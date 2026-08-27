@@ -39,6 +39,20 @@ fixture for the whole project.
 | `sturm.gcs` | GCS v5 sheet, saved by GCS |
 | `sturm.foundry.json` | Foundry "Export Data" dump of the same actor |
 
+`samples/upstream/` holds two fixtures copied out of the `gcs` clone, used to
+test the reader/writer against GCS output we did not produce:
+
+| File | What it covers |
+|---|---|
+| `issue767.gcs` | a small complete sheet (150 points, 1 trait, 2 skills, 2 techniques) |
+| `container_with_own_data.eqp` | **the only container fixture we have** — an `E`-prefixed equipment container with its own `weapons`, `modifiers` and `replacements`, plus a nested `e` child |
+
+Both were extracted from git blobs (`git -C gcs show HEAD:model/gurps/testdata/...`),
+not copied from the working tree. **The clones are checked out with
+`core.autocrlf=true`, so their working-tree files have CRLF** and would fail
+byte-exactness tests for reasons that have nothing to do with our code. This
+repository pins `eol=lf` in `.gitattributes` so its own copies stay correct.
+
 The Foundry actor was originally *imported from* `sturm.gcs`
 (`system.additionalresources.importname` records the filename, and
 `system.lastImport` the timestamp). The GCS file was edited afterwards, so the

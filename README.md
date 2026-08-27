@@ -4,9 +4,33 @@ Converts a GURPS character exported from **Foundry VTT** (via the
 [GURPS Game Aid](https://github.com/crnormand/gurps) system) back into a **GCS**
 (`.gcs`) character sheet — closing a loop that currently only runs one way.
 
-**Status: Phase 1 complete — documentation and problem analysis. No code yet.**
-Phase 2 will be written in **Python 3.12+**, packaged with PyInstaller
-(see [`docs/06-architecture.md`](docs/06-architecture.md) §6.6).
+**Status: Phase 2 in progress.** Phase 1 (analysis, see `docs/`) is complete.
+Built so far: the Foundry export reader, TID handling, a byte-exact GCS
+reader/writer, and a read-only `inspect` command. The converter itself is next.
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+```bash
+json2gcs inspect samples/sturm/sturm.foundry.json --base samples/sturm/sturm.gcs
+```
+
+```
+  section              rows  containers  added in Foundry
+  traits                 22           0                 0
+  skills                 21           0                 0
+  equipment (carried)    23           0                 0
+  ...
+  matched by TID    : 70
+  only in Foundry   : 0
+  only in base sheet: 3
+      s0mjErCL7ThyKHrVv  Jumping   (skill)
+      s1SJd36jSlBbtL4FT  Tracking   (skill)
+      sn5XDmL2OJTim_8JB  Climbing   (skill)
+    ^ ambiguous: either deleted in Foundry or added to GCS after
+      the export. See docs/06-architecture.md 6.3.
+```
 
 ## The short version
 
@@ -44,12 +68,23 @@ Read in order:
 ## Layout
 
 ```
+src/json2gcs/
+  jsonio.py              byte-exact GCS JSON reader/writer
+  tid.py                 GCS TID validation, kind prefixes, minting
+  foundry.py             Foundry actor export reader, flat-indexed by TID
+  cli.py                 command line entry point
+tests/                   pytest suite (100 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
-  sturm.gcs
-  sturm.foundry.json
+samples/upstream/        GCS-authored fixtures, incl. the only container example
 gcs/                     upstream clone, git-ignored (richardwilkes/gcs)
 gurps/                   upstream clone, git-ignored (crnormand/gurps)
+```
+
+Run the tests with:
+
+```bash
+python -m pytest
 ```
 
 The two upstream clones are reference material, not dependencies. They are

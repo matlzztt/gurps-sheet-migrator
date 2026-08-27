@@ -1,7 +1,22 @@
-# GCS writes LF-only, tab-indented UTF-8 and its serialization contract depends on
-# it (docs/02-gcs-format.md 2.1). Never let autocrlf rewrite these fixtures.
-*.gcs        text eol=lf
-*.json       text eol=lf
-*.md         text eol=lf
-.gitignore   text eol=lf
-.gitattributes text eol=lf
+# This project must never store CRLF. GCS writes LF-only, tab-indented UTF-8 and
+# its serialization contract depends on it (docs/02-gcs-format.md 2.1); the
+# byte-exactness tests compare fixture bytes directly, so a CRLF checkout would
+# fail them for reasons unrelated to the code. Note that the upstream clones in
+# gcs/ and gurps/ are checked out with core.autocrlf and *do* have CRLF working
+# trees — always take fixtures from their git blobs, never their working tree.
+* text=auto eol=lf
+
+# GCS data files, spelled out so intent survives any future change to the above.
+*.gcs text eol=lf
+*.eqp text eol=lf
+*.adq text eol=lf
+*.skl text eol=lf
+*.not text eol=lf
+*.spl text eol=lf
+*.gct text eol=lf
+
+# Binary, so git never touches them.
+*.png binary
+*.jpg binary
+*.webp binary
+*.pdf binary

@@ -21,3 +21,7 @@ Thumbs.db
 # --- Scratch ---
 /scratch/
 *.tmp
+
+# --- Python packaging ---
+*.egg-info/
+.pytest_cache/

@@ -201,10 +201,14 @@ the user swap.
 
 ## 6.8 Build order
 
-1. Reader + normalizer for the Foundry export, with the flat-by-TID index.
-2. GCS reader/writer that round-trips `sturm.gcs` **byte-identically**. Do this
-   before any transform — it proves the serializer against §6.5 step 4 alone.
+1. ~~Reader + normalizer for the Foundry export, with the flat-by-TID index.~~
+   **Done** — `src/json2gcs/foundry.py`, `src/json2gcs/tid.py`.
+2. ~~GCS reader/writer that round-trips `sturm.gcs` **byte-identically**.~~
+   **Done** — `src/json2gcs/jsonio.py`. Round-trips all three available GCS
+   files byte-for-byte, including the container fixture.
 3. Reconciler + report. `--dry-run` becomes useful here, before anything is written.
+   *(`json2gcs inspect` is a first cut: it matches by TID and names the
+   ambiguous rows, but writes nothing.)*
 4. Field policy table, starting with the ✅ rows only.
 5. ⚙️ rows (attributes via the points route, SM, tags, dates).
 6. 🔶 rows, each behind its own guard and each with a golden-test case.
