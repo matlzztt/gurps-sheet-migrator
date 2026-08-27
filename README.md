@@ -4,10 +4,10 @@ Converts a GURPS character exported from **Foundry VTT** (via the
 [GURPS Game Aid](https://github.com/crnormand/gurps) system) back into a **GCS**
 (`.gcs`) character sheet — closing a loop that currently only runs one way.
 
-**Status: Phase 2 — the merge path works end to end.** Read a Foundry export
-and the original `.gcs`, and it writes a merged sheet: `json2gcs convert`.
-Still to come: refreshing `calc` so output re-imports cleanly into Foundry, and
-packaging as an executable.
+**Status: Phase 2 — the merge path works, and GCS itself verifies it.** Read a
+Foundry export and the original `.gcs`, and it writes a merged sheet that GCS
+loads and rewrites unchanged. Still to come: an end-to-end re-import back into
+Foundry, and packaging as an executable.
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -50,6 +50,21 @@ Needs review (4) — found, but not safe to apply
         weight       "1" → "8"
             row has modifiers, so Foundry's value is post-modifier
 ```
+
+If GCS is installed, `--verify` has GCS itself load the result and confirm it
+rewrites it unchanged, and `--refresh-calc` runs the output back through GCS so
+its derived values are authoritative:
+
+```bash
+json2gcs convert actor.json --base character.gcs --refresh-calc --verify
+```
+
+```
+  · calc refreshed by GCS itself; the file is now exactly what GCS would save
+  · verify: GCS loaded the file and rewrote it identically
+```
+
+Point at the binary with `--gcs PATH` or `JSON2GCS_GCS` if it is not on `PATH`.
 
 `inspect` gives a plainer summary of one export. `inspect` and `diff` never
 write; `convert` writes only to its output file.
@@ -107,7 +122,7 @@ src/json2gcs/
   apply.py               writes a reconciliation into the base sheet
   report.py              renders a reconciliation as readable text
   cli.py                 command line entry point
-tests/                   pytest suite (198 tests)
+tests/                   pytest suite (208 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
 samples/container/       container + known-changelog fixture set
@@ -147,6 +162,12 @@ commands there if you need them.
   place, so modifiers, features, prereqs, library `source` links, settings and
   the points log survive because nothing touches them — not because they were
   copied correctly.
+- **GCS validates the output.** `gcs --convert` runs headlessly, so the real
+  application is the test oracle. It accepts our merged sheet and rewrites it
+  identically apart from `calc`, which it recomputes — and that recomputation
+  confirms the edits landed. See `docs/05-fidelity.md` §5.9.
+- **`calc` is delegated, not reimplemented.** `--refresh-calc` runs the output
+  back through GCS, so no GURPS arithmetic had to be rewritten.
 - **Containers round-trip cleanly.** `samples/container/` covers nesting two
   levels deep across traits, skills and both equipment lists; uppercase TIDs,
   `contains` and `parentuuid` all survive intact.

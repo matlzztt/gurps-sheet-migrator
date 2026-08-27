@@ -8,9 +8,11 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from . import apply as applymod
@@ -151,28 +153,91 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
-def _verify_with_gcs(path: Path) -> tuple[bool, str]:
-    """Load the output with GCS itself, if it is installed.
+#: Where to look for the GCS application, in order. Override with --gcs or
+#: the JSON2GCS_GCS environment variable; installs are often not on PATH.
+_GCS_CANDIDATES = (
+    r"C:\Program Files\GCS\gcs.exe",
+    r"C:\Program Files (x86)\GCS\gcs.exe",
+    "/Applications/GCS.app/Contents/MacOS/gcs",
+    "/usr/local/bin/gcs",
+    "/usr/bin/gcs",
+)
 
-    ``gcs --convert`` reads a file, rewrites it in the current data format and
-    exits, which makes the real application a headless validator
+
+def find_gcs(explicit: str | None = None) -> Path | None:
+    """Locate the GCS application, or return None."""
+    for candidate in (explicit, os.environ.get("JSON2GCS_GCS")):
+        if candidate:
+            path = Path(candidate)
+            return path if path.is_file() else None
+    found = shutil.which("gcs")
+    if found:
+        return Path(found)
+    for candidate in _GCS_CANDIDATES:
+        path = Path(candidate)
+        if path.is_file():
+            return path
+    return None
+
+
+def run_gcs_convert(binary: Path, target: Path) -> tuple[bool, str]:
+    """Run ``gcs --convert`` on a file. **Rewrites it in place.**
+
+    This is GCS loading the file for real and writing it back in the current
+    data format, which makes the application itself a headless validator
     (docs/06-architecture.md 6.5).
     """
-    binary = shutil.which("gcs")
-    if not binary:
-        return False, "gcs not on PATH; skipped"
     try:
         done = subprocess.run(
-            [binary, "--convert", str(path)],
+            [str(binary), "--convert", str(target)],
             capture_output=True,
             text=True,
-            timeout=120,
+            timeout=180,
         )
     except (OSError, subprocess.SubprocessError) as err:
-        return False, f"could not run gcs: {err}"
+        return False, f"could not run {binary}: {err}"
     if done.returncode != 0:
         return False, (done.stderr or done.stdout or "non-zero exit").strip()
-    return True, "GCS loaded and rewrote the file without complaint"
+    return True, (done.stdout or "").strip()
+
+
+def _strip_calc(value):
+    """Drop every ``calc`` block, which GCS recomputes on load."""
+    if isinstance(value, dict):
+        return {k: _strip_calc(v) for k, v in value.items() if k != "calc"}
+    if isinstance(value, list):
+        return [_strip_calc(v) for v in value]
+    return value
+
+
+def _verify_with_gcs(path: Path, binary: Path) -> tuple[bool, list[str]]:
+    """Have GCS load our output, then check it did not have to change anything.
+
+    GCS rewrites ``calc`` from the sheet's real values, so those blocks are
+    expected to differ — that is the point of them being write-only.  Anything
+    *else* that differs is a defect in our writer.
+    """
+    with tempfile.TemporaryDirectory() as workdir:
+        copy = Path(workdir) / path.name
+        shutil.copy(path, copy)
+        ok, detail = run_gcs_convert(binary, copy)
+        if not ok:
+            return False, [f"GCS rejected the file: {detail}"]
+
+        ours = jsonio.loads(jsonio.read_text(path))
+        theirs = jsonio.loads(jsonio.read_text(copy))
+
+    if jsonio.dumps(ours) == jsonio.dumps(theirs):
+        return True, ["GCS loaded the file and rewrote it identically"]
+    if jsonio.dumps(_strip_calc(ours)) == jsonio.dumps(_strip_calc(theirs)):
+        return True, [
+            "GCS loaded the file and changed nothing but the calc blocks,",
+            "which it recomputes on open. Pass --refresh-calc to keep its values.",
+        ]
+    return False, [
+        "GCS rewrote the file differently outside of calc — that is a writer bug.",
+        f"Compare {path} against a 'gcs --convert' of a copy.",
+    ]
 
 
 def cmd_convert(args: argparse.Namespace) -> int:
@@ -221,15 +286,33 @@ def cmd_convert(args: argparse.Namespace) -> int:
         f"{len(outcome.dropped)} dropped, {len(outcome.kept)} kept)"
     )
     for note in outcome.notes:
+        if args.refresh_calc and note.startswith("calc blocks"):
+            continue  # about to be superseded by GCS's own values
         print(f"  · {note}")
     if outcome.skipped:
         print(f"  · {len(outcome.skipped)} change(s) left for review — see above")
 
-    if args.verify:
-        ok, detail = _verify_with_gcs(out)
-        print(f"  · verify: {detail}")
-        if not ok and shutil.which("gcs"):
-            return 1
+    if args.verify or args.refresh_calc:
+        binary = find_gcs(args.gcs)
+        if binary is None:
+            print(
+                "  · GCS not found — pass --gcs PATH or set JSON2GCS_GCS to enable "
+                "verification"
+            )
+            return 0
+        if args.refresh_calc:
+            ok, detail = run_gcs_convert(binary, out)
+            if not ok:
+                print(f"  · refresh-calc failed: {detail}")
+                return 1
+            print("  · calc refreshed by GCS itself; the file is now exactly what "
+                  "GCS would save")
+        if args.verify:
+            ok, lines = _verify_with_gcs(out, binary)
+            for i, line in enumerate(lines):
+                print(f"  · verify: {line}" if i == 0 else f"             {line}")
+            if not ok:
+                return 1
     return 0
 
 
@@ -304,7 +387,20 @@ def build_parser() -> argparse.ArgumentParser:
     convert.add_argument(
         "--verify",
         action="store_true",
-        help="after writing, load the result with 'gcs --convert' if available",
+        help="have GCS itself load the result and confirm it rewrites it unchanged",
+    )
+    convert.add_argument(
+        "--refresh-calc",
+        action="store_true",
+        help=(
+            "run the output through GCS so its derived 'calc' values are correct. "
+            "GCS ignores calc on load, but GGA needs it to re-import"
+        ),
+    )
+    convert.add_argument(
+        "--gcs",
+        metavar="PATH",
+        help="path to the GCS executable (or set JSON2GCS_GCS)",
     )
     convert.set_defaults(func=cmd_convert)
     return parser

@@ -118,6 +118,11 @@ That gives a real acceptance test with no GUI:
 Step 4 is the highest-value test in the project: it makes GCS's own serializer the
 oracle, so we never have to reason about Go struct field order by hand.
 
+**This is now implemented and passing** (`tests/test_oracle.py`, skipped when GCS
+is absent). GCS accepts our merged output and rewrites it identically apart from
+`calc`, which it recomputes — see `docs/05-fidelity.md` §5.9. The same mechanism
+gave us `--refresh-calc` for free.
+
 Layer beneath it:
 
 - **Round-trip test.** `sturm.gcs` → (GGA import rules, reimplemented) → synthetic
@@ -221,8 +226,11 @@ the user swap.
 7. ~~Writer.~~ **Done** — `apply.py` and `json2gcs convert`. Edits the base
    structure in place so everything Foundry never knew about survives by
    construction rather than by being copied correctly.
-8. `calc` refresh, then Foundry re-import as an end-to-end check.
-9. Packaging.
+8. ~~`calc` refresh.~~ **Done**, and more cheaply than planned — `--refresh-calc`
+   runs the output back through `gcs --convert`, so GCS computes its own derived
+   values. No GURPS arithmetic reimplemented. See `docs/05-fidelity.md` §5.9.
+9. Foundry re-import as an end-to-end check — needs a Foundry session.
+10. Packaging.
 
 ### What the writer had to get right
 

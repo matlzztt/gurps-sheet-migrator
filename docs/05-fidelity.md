@@ -299,3 +299,59 @@ skill, the note edit, and HP/FP damage.
 Both directions are locked in `tests/test_reconcile.py`. The pair is worth more
 than either half: the control catches phantom changes, the played export catches
 missed ones, and neither alone would have caught all four corrections above.
+
+## 5.9 Verified against GCS itself
+
+`gcs --convert` loads a file, rewrites it in the current data format and exits.
+It runs headlessly, so the real application can be used as the oracle
+(`docs/06-architecture.md` §6.5). Three results, all in `tests/test_oracle.py`:
+
+**The fixtures are a fixed point.** `gcs --convert` rewrites `sturm.gcs` and
+`container.gcs` byte-for-byte identically. That matters on its own: it means
+byte-comparing our writer against them tests something real rather than
+comparing against an arbitrary encoding.
+
+*(`issue767.gcs` is the exception, and instructively so — it is upstream's
+regression fixture for a damage-calculation bug, recording `"1d-2 cr"` where
+current GCS computes `"1d-1 cr"`. The difference is inside a `calc` block and so
+is inert.)*
+
+**GCS accepts our merged output and rewrites it identically apart from `calc`.**
+This is the strongest available check on the writer: key order, `omitzero`
+handling, number formatting, indentation and encoding all agree with GCS's own
+serializer, on a file we constructed rather than copied.
+
+**GCS's recomputation confirms the edits landed correctly.** Every `calc`
+difference is GCS deriving something from a value we wrote:
+
+| GCS recomputed | Because we wrote |
+|---|---|
+| `hp.calc.current` 10 → 6 | `hp.damage: 4` |
+| `fp.calc.current` 11 → 3 | `fp.damage: 8` |
+| Arrow `extended_value` 20 → 8, `extended_weight` 1 lb → 0.4 lb | `quantity: 4` |
+| `basic_lift` 20 lb → 5 lb, `move` 6 → 3, `dodge` 9 → 5, two skills −3 | see below |
+
+That last row is worth understanding rather than dismissing. FP 3 of 11 is under
+a third, so GCS applies **Very Tired**: ST is halved, 10 → 5. Basic Lift is
+ST²/5, so it drops from 20 lb to 5 lb, which pushes the character into a worse
+encumbrance band, which costs Move, Dodge, and three levels on every
+encumbrance-penalised skill.
+
+Nothing is wrong here — it is the sheet correctly modelling a character at 3 FP.
+But it shows how far a single carried-back value propagates, and it is a good
+argument for the report naming what it changed rather than just doing it.
+
+### Letting GCS compute `calc`
+
+Since `gcs --convert` produces exactly the right derived values, `--refresh-calc`
+runs the output back through GCS. After that the file is a **byte-exact fixed
+point** of GCS's own serializer — `--verify` reports "rewrote it identically".
+
+This closes the `calc` question (`docs/02-gcs-format.md` §2.6) without
+reimplementing any GURPS arithmetic. GCS ignores `calc` on load, so it is
+optional for GCS; GGA's importer *requires* it, so it matters for the trip back
+into Foundry. Delegating it to GCS is both less code and more correct than
+copying values across from the export would have been.
+
+The flag needs GCS installed. Point at it with `--gcs PATH` or `JSON2GCS_GCS`;
+installs are frequently not on `PATH`.
