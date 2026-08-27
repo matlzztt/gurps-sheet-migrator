@@ -65,11 +65,12 @@ def test_carried_flag(actor: foundry.Actor):
     }
 
 
-def test_name_prefers_original(actor: foundry.Actor):
-    """'Good Reputation 3' is the decorated form; GCS had 'Good Reputation'."""
+def test_gcs_name_and_display_name_are_distinct(actor: foundry.Actor):
+    """GGA appends the level to 'name' and leaves 'originalName' as GCS had it."""
     row = actor.by_tid["t89rhDVCsi9fR6yJu"]
-    assert row.data["name"] == "Good Reputation 3"
-    assert row.name == "Good Reputation"
+    assert row.gcs_name == "Good Reputation"
+    assert row.display_name == "Good Reputation 3"
+    assert row.name == row.display_name
 
 
 def test_techniques_keep_their_q_prefix(actor: foundry.Actor):

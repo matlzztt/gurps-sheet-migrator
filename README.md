@@ -73,10 +73,11 @@ src/json2gcs/
   tid.py                 GCS TID validation, kind prefixes, minting
   foundry.py             Foundry actor export reader, flat-indexed by TID
   cli.py                 command line entry point
-tests/                   pytest suite (100 tests)
+tests/                   pytest suite (118 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
-samples/upstream/        GCS-authored fixtures, incl. the only container example
+samples/container/       container + known-changelog fixture set
+samples/upstream/        GCS-authored fixtures from the gcs repo
 gcs/                     upstream clone, git-ignored (richardwilkes/gcs)
 gurps/                   upstream clone, git-ignored (crnormand/gurps)
 ```
@@ -102,7 +103,10 @@ commands there if you need them.
   exit headlessly. Diffing our output against its rewrite makes GCS's own
   serializer the test oracle.
 - **The lossy fields are enumerable**, not a vague fog — see `docs/05-fidelity.md`.
-- **The sample character is completely flat** — no containers anywhere (verified:
-  no `children`, no uppercase TIDs, every `contains` empty). Container handling is
-  the largest untested area; a fixture with real nesting is the top gap.
-  `equipment` / `other_equipment` is a two-list split, not nesting.
+- **Containers round-trip cleanly.** `samples/container/` covers nesting two
+  levels deep across traits, skills and both equipment lists; uppercase TIDs,
+  `contains` and `parentuuid` all survive intact.
+- **Three corruption vectors found by experiment**, not by reading source: note
+  indentation compounds on every save cycle (0 → 8 → 44 spaces), `equipped`
+  cascades through containers, and a rename lands in `name` while
+  `originalName` stays put. See `docs/05-fidelity.md` §5.7.

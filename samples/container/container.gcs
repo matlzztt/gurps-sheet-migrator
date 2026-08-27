@@ -1,0 +1,3623 @@
+{
+	"version": 5,
+	"id": "A0m9Zw_BuLDSOCLwc",
+	"total_points": 209,
+	"points_record": [
+		{
+			"when": "2026-08-14T14:10:32-03:00",
+			"points": 206,
+			"reason": "Initial points"
+		},
+		{
+			"when": "2026-08-26T18:46:28-03:00",
+			"points": 3,
+			"reason": "Session award"
+		}
+	],
+	"profile": {
+		"name": "Stürm",
+		"age": "19",
+		"birthday": "February 26",
+		"eyes": "Green",
+		"hair": "Light-Brown",
+		"skin": "Pale",
+		"handedness": "Left",
+		"gender": "Male",
+		"height": "5'8.8\"",
+		"weight": "140 lb",
+		"player_name": "Matheus Lazzarotto",
+		"title": "Turkes",
+		"organization": "Yarga",
+		"religion": "Mother Root",
+		"tech_level": "1",
+		"portrait": "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"
+	},
+	"settings": {
+		"page": {
+			"paper_size": "letter",
+			"orientation": "portrait",
+			"top_margin": "0.25 in",
+			"left_margin": "0.25 in",
+			"bottom_margin": "0.25 in",
+			"right_margin": "0.25 in"
+		},
+		"block_layout": [
+			"reactions conditional_modifiers",
+			"melee",
+			"ranged",
+			"traits skills",
+			"spells",
+			"equipment",
+			"other_equipment",
+			"notes"
+		],
+		"attributes": [
+			{
+				"id": "st",
+				"type": "integer",
+				"name": "ST",
+				"full_name": "Strength",
+				"base": "10",
+				"cost_per_point": 10,
+				"cost_adj_percent_per_sm": 10
+			},
+			{
+				"id": "dx",
+				"type": "integer",
+				"name": "DX",
+				"full_name": "Dexterity",
+				"base": "10",
+				"cost_per_point": 20
+			},
+			{
+				"id": "iq",
+				"type": "integer",
+				"name": "IQ",
+				"full_name": "Intelligence",
+				"base": "10",
+				"cost_per_point": 20
+			},
+			{
+				"id": "ht",
+				"type": "integer",
+				"name": "HT",
+				"full_name": "Health",
+				"base": "10",
+				"cost_per_point": 10
+			},
+			{
+				"id": "will",
+				"type": "integer",
+				"name": "Will",
+				"base": "$iq",
+				"cost_per_point": 5
+			},
+			{
+				"id": "fright_check",
+				"type": "integer",
+				"name": "Fright Check",
+				"base": "$will",
+				"cost_per_point": 2
+			},
+			{
+				"id": "per",
+				"type": "integer",
+				"name": "Per",
+				"full_name": "Perception",
+				"base": "$iq",
+				"cost_per_point": 5
+			},
+			{
+				"id": "vision",
+				"type": "integer",
+				"name": "Vision",
+				"base": "$per",
+				"cost_per_point": 2
+			},
+			{
+				"id": "hearing",
+				"type": "integer",
+				"name": "Hearing",
+				"base": "$per",
+				"cost_per_point": 2
+			},
+			{
+				"id": "taste_smell",
+				"type": "integer",
+				"name": "Taste & Smell",
+				"base": "$per",
+				"cost_per_point": 2
+			},
+			{
+				"id": "touch",
+				"type": "integer",
+				"name": "Touch",
+				"base": "$per",
+				"cost_per_point": 2
+			},
+			{
+				"id": "basic_speed",
+				"type": "decimal",
+				"name": "Basic Speed",
+				"base": "($dx + $ht) / 4",
+				"cost_per_point": 20
+			},
+			{
+				"id": "basic_move",
+				"type": "integer",
+				"name": "Basic Move",
+				"base": "Math.floor($basic_speed)",
+				"cost_per_point": 5
+			},
+			{
+				"id": "fp",
+				"type": "pool",
+				"name": "FP",
+				"full_name": "Fatigue Points",
+				"base": "$ht",
+				"cost_per_point": 3,
+				"thresholds": [
+					{
+						"state": "Unconscious",
+						"value": "-$fp",
+						"ops": [
+							"halve_move",
+							"halve_dodge",
+							"halve_st"
+						]
+					},
+					{
+						"state": "Collapse",
+						"value": "0",
+						"explanation": "- Roll vs. Will to do anything besides talk or rest; failure causes unconsciousness\n- Each FP you lose below 0 also causes 1 HP of injury\n- Move, Dodge and ST are halved (B426)",
+						"ops": [
+							"halve_move",
+							"halve_dodge",
+							"halve_st"
+						]
+					},
+					{
+						"state": "Tired",
+						"value": "Math.ceil($fp / 3) - 1",
+						"explanation": "Move, Dodge and ST are halved (B426)",
+						"ops": [
+							"halve_move",
+							"halve_dodge",
+							"halve_st"
+						]
+					},
+					{
+						"state": "Tiring",
+						"value": "$fp - 1"
+					},
+					{
+						"state": "Rested",
+						"value": "$fp"
+					}
+				]
+			},
+			{
+				"id": "hp",
+				"type": "pool",
+				"name": "HP",
+				"full_name": "Hit Points",
+				"base": "$st",
+				"cost_per_point": 2,
+				"cost_adj_percent_per_sm": 10,
+				"thresholds": [
+					{
+						"state": "Dead",
+						"value": "Math.round(-$hp * 5)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Dying #4",
+						"value": "Math.round(-$hp * 4)",
+						"explanation": "- Roll vs. HT to avoid death\n- Roll vs. HT-4 every second to avoid falling unconscious\n- Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Dying #3",
+						"value": "Math.round(-$hp * 3)",
+						"explanation": "- Roll vs. HT to avoid death\n- Roll vs. HT-3 every second to avoid falling unconscious\n- Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Dying #2",
+						"value": "Math.round(-$hp * 2)",
+						"explanation": "- Roll vs. HT to avoid death\n- Roll vs. HT-2 every second to avoid falling unconscious\n- Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Dying #1",
+						"value": "-$hp",
+						"explanation": "- Roll vs. HT to avoid death\n- Roll vs. HT-1 every second to avoid falling unconscious\n- Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Collapse",
+						"value": "0",
+						"explanation": "- Roll vs. HT every second to avoid falling unconscious\n- Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Reeling",
+						"value": "Math.ceil($hp / 3) - 1",
+						"explanation": "Move and Dodge are halved (B419)",
+						"ops": [
+							"halve_move",
+							"halve_dodge"
+						]
+					},
+					{
+						"state": "Wounded",
+						"value": "$hp - 1"
+					},
+					{
+						"state": "Healthy",
+						"value": "$hp"
+					}
+				]
+			}
+		],
+		"body_type": {
+			"name": "Humanoid",
+			"roll": "3d",
+			"locations": [
+				{
+					"id": "eye",
+					"choice_name": "Eyes",
+					"table_name": "Eyes",
+					"hit_penalty": -9,
+					"description": "An attack that misses by 1 hits the torso instead. Only\nimpaling (imp), piercing (pi-, pi, pi+, pi++), and\ntight-beam burning (burn) attacks can target the eye – and\nonly from the front or sides. Injury over HP÷10 blinds the\neye. Otherwise, treat as skull, but without the extra DR!",
+					"calc": {
+						"roll_range": "-",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "skull",
+					"choice_name": "Skull",
+					"table_name": "Skull",
+					"slots": 2,
+					"hit_penalty": -7,
+					"dr_bonus": 2,
+					"description": "An attack that misses by 1 hits the torso instead. Wounding\nmodifier is x4. Knockdown rolls are at -10. Critical hits\nuse the Critical Head Blow Table (B556). Exception: These\nspecial effects do not apply to toxic (tox) damage.",
+					"calc": {
+						"roll_range": "3-4",
+						"dr": {
+							"all": 2
+						}
+					}
+				},
+				{
+					"id": "face",
+					"choice_name": "Face",
+					"table_name": "Face",
+					"slots": 1,
+					"hit_penalty": -5,
+					"description": "An attack that misses by 1 hits the torso instead. Jaw,\ncheeks, nose, ears, etc. If the target has an open-faced\nhelmet, ignore its DR. Knockdown rolls are at -5. Critical\nhits use the Critical Head Blow Table (B556). Corrosion\n(cor) damage gets a x1½ wounding modifier, and if it\ninflicts a major wound, it also blinds one eye (both eyes on\ndamage over full HP). Random attacks from behind hit the\nskull instead.",
+					"calc": {
+						"roll_range": "5",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "leg",
+					"choice_name": "Leg",
+					"table_name": "Right Leg",
+					"slots": 2,
+					"hit_penalty": -2,
+					"description": "Reduce the wounding multiplier of large piercing (pi+), huge\npiercing (pi++), and impaling (imp) damage to x1. Any major\nwound (loss of over ½ HP from one blow) cripples the limb.\nDamage beyond that threshold is lost.",
+					"calc": {
+						"roll_range": "6-7",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "arm",
+					"choice_name": "Arm",
+					"table_name": "Right Arm",
+					"slots": 1,
+					"hit_penalty": -2,
+					"description": "Reduce the wounding multiplier of large piercing (pi+), huge\npiercing (pi++), and impaling (imp) damage to x1. Any major\nwound (loss of over ½ HP from one blow) cripples the limb.\nDamage beyond that threshold is lost. If holding a shield,\ndouble the penalty to hit: -4 for shield arm instead of -2.",
+					"calc": {
+						"roll_range": "8",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "torso",
+					"choice_name": "Torso",
+					"table_name": "Torso",
+					"slots": 2,
+					"calc": {
+						"roll_range": "9-10",
+						"dr": {
+							"all": 1
+						}
+					}
+				},
+				{
+					"id": "groin",
+					"choice_name": "Groin",
+					"table_name": "Groin",
+					"slots": 1,
+					"hit_penalty": -3,
+					"description": "An attack that misses by 1 hits the torso instead. Human\nmales and the males of similar species suffer double shock\nfrom crushing (cr) damage, and get -5 to knockdown rolls.\nOtherwise, treat as a torso hit.",
+					"calc": {
+						"roll_range": "11",
+						"dr": {
+							"all": 1
+						}
+					}
+				},
+				{
+					"id": "arm",
+					"choice_name": "Arm",
+					"table_name": "Left Arm",
+					"slots": 1,
+					"hit_penalty": -2,
+					"description": "Reduce the wounding multiplier of large piercing (pi+), huge\npiercing (pi++), and impaling (imp) damage to x1. Any major\nwound (loss of over ½ HP from one blow) cripples the limb.\nDamage beyond that threshold is lost. If holding a shield,\ndouble the penalty to hit: -4 for shield arm instead of -2.",
+					"calc": {
+						"roll_range": "12",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "leg",
+					"choice_name": "Leg",
+					"table_name": "Left Leg",
+					"slots": 2,
+					"hit_penalty": -2,
+					"description": "Reduce the wounding multiplier of large piercing (pi+), huge\npiercing (pi++), and impaling (imp) damage to x1. Any major\nwound (loss of over ½ HP from one blow) cripples the limb.\nDamage beyond that threshold is lost.",
+					"calc": {
+						"roll_range": "13-14",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "hand",
+					"choice_name": "Hand",
+					"table_name": "Hand",
+					"slots": 1,
+					"hit_penalty": -4,
+					"description": "If holding a shield, double the penalty to hit: -8 for\nshield hand instead of -4. Reduce the wounding multiplier of\nlarge piercing (pi+), huge piercing (pi++), and impaling\n(imp) damage to x1. Any major wound (loss of over ⅓ HP\nfrom one blow) cripples the extremity. Damage beyond that\nthreshold is lost.",
+					"calc": {
+						"roll_range": "15",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "foot",
+					"choice_name": "Foot",
+					"table_name": "Foot",
+					"slots": 1,
+					"hit_penalty": -4,
+					"description": "Reduce the wounding multiplier of large piercing (pi+), huge\npiercing (pi++), and impaling (imp) damage to x1. Any major\nwound (loss of over ⅓ HP from one blow) cripples the\nextremity. Damage beyond that threshold is lost.",
+					"calc": {
+						"roll_range": "16",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "neck",
+					"choice_name": "Neck",
+					"table_name": "Neck",
+					"slots": 2,
+					"hit_penalty": -5,
+					"description": "An attack that misses by 1 hits the torso instead. Neck and\nthroat. Increase the wounding multiplier of crushing (cr)\nand corrosion (cor) attacks to x1½, and that of cutting\n(cut) damage to x2. At the GM’s option, anyone killed by a\ncutting (cut) blow to the neck is decapitated!",
+					"calc": {
+						"roll_range": "17-18",
+						"dr": {
+							"all": 0
+						}
+					}
+				},
+				{
+					"id": "vitals",
+					"choice_name": "Vitals",
+					"table_name": "Vitals",
+					"hit_penalty": -3,
+					"description": "An attack that misses by 1 hits the torso instead. Heart,\nlungs, kidneys, etc. Increase the wounding modifier for an\nimpaling (imp) or any piercing (pi-, pi, pi+, pi++) attack\nto x3. Increase the wounding modifier for a tight-beam\nburning (burn) attack to x2. Other attacks cannot target the\nvitals.",
+					"calc": {
+						"roll_range": "-",
+						"dr": {
+							"all": 1
+						}
+					}
+				}
+			]
+		},
+		"damage_progression": "basic_set",
+		"default_length_units": "m",
+		"default_weight_units": "kg",
+		"user_description_display": "tooltip",
+		"modifiers_display": "inline",
+		"notes_display": "inline",
+		"skill_level_adj_display": "tooltip",
+		"show_spell_adj": true
+	},
+	"attributes": [
+		{
+			"attr_id": "st",
+			"adj": 0,
+			"calc": {
+				"value": 10,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "dx",
+			"adj": 2,
+			"calc": {
+				"value": 12,
+				"points": 40
+			}
+		},
+		{
+			"attr_id": "iq",
+			"adj": 4,
+			"calc": {
+				"value": 14,
+				"points": 80
+			}
+		},
+		{
+			"attr_id": "ht",
+			"adj": 1,
+			"calc": {
+				"value": 11,
+				"points": 10
+			}
+		},
+		{
+			"attr_id": "will",
+			"adj": 0,
+			"calc": {
+				"value": 14,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "fright_check",
+			"adj": 0,
+			"calc": {
+				"value": 14,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "per",
+			"adj": 1,
+			"calc": {
+				"value": 15,
+				"points": 5
+			}
+		},
+		{
+			"attr_id": "vision",
+			"adj": 0,
+			"calc": {
+				"value": 15,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "hearing",
+			"adj": 0,
+			"calc": {
+				"value": 15,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "taste_smell",
+			"adj": 0,
+			"calc": {
+				"value": 15,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "touch",
+			"adj": 0,
+			"calc": {
+				"value": 15,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "basic_speed",
+			"adj": 0.25,
+			"calc": {
+				"value": 6,
+				"points": 5
+			}
+		},
+		{
+			"attr_id": "basic_move",
+			"adj": 0,
+			"calc": {
+				"value": 6,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "fp",
+			"adj": 0,
+			"calc": {
+				"value": 11,
+				"current": 11,
+				"points": 0
+			}
+		},
+		{
+			"attr_id": "hp",
+			"adj": 0,
+			"calc": {
+				"value": 10,
+				"current": 10,
+				"points": 0
+			}
+		}
+	],
+	"traits": [
+		{
+			"id": "T_7dZkq1Ziwxfz--o",
+			"name": "Trait Container",
+			"children": [
+				{
+					"id": "tqSpM2benfhhMyiq1",
+					"name": "Green Sight",
+					"local_notes": "Whenever you sleep, roll 1d6. On a 6, you experience either a Premonition or a Portent.\nPremonitions are simple dreams dominated by emotions, sensations, and vague impressions rather than clear images.\nAfter experiencing a Premonition, choose one roll you make during the following day. You receive +3 to that\nroll. \nPortents. Portents are true prophetic dreams: powerful visions of events that are happening or are about to\nhappen. ",
+					"base_points": 15,
+					"calc": {
+						"points": 15
+					}
+				},
+				{
+					"id": "tdfQMngmrK5O0WWc9",
+					"name": "Language: Westerosi Common",
+					"reference": "B24",
+					"local_notes": "Spoken (Native) 3 + Written (Accented) 2. B24",
+					"base_points": 5,
+					"calc": {
+						"points": 5
+					}
+				}
+			],
+			"calc": {
+				"points": 20
+			}
+		},
+		{
+			"id": "tMll_8y_mBSyZ3oEg",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "t_iKOx_M0gzCIh-Ws"
+			},
+			"name": "Clerical Investment",
+			"reference": "B43",
+			"local_notes": "Menkhu (line-knower), not Yargachin (priest) - he has not been cut. Licensed to open bodies and to perform the Kolyarga (the-bog-opening; the lesser rite). Purely social; no miracles. B43",
+			"tags": [
+				"Advantage",
+				"Social"
+			],
+			"base_points": 5,
+			"features": [
+				{
+					"type": "reaction_bonus",
+					"situation": "from members of your religion and those who respect your faith",
+					"amount": 1
+				}
+			],
+			"calc": {
+				"points": 5
+			}
+		},
+		{
+			"id": "t89rhDVCsi9fR6yJu",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "ta04iFiZ_Kw0s0juj"
+			},
+			"name": "Good Reputation",
+			"reference": "B26,MA54",
+			"local_notes": "+3 reactions from the Turchin, and throughout the Neck. Small class of people (x1/3), so 3 levels cost +5 points. The pair is one multifaceted Reputation netting 0. B26-28",
+			"tags": [
+				"Advantage",
+				"Social"
+			],
+			"modifiers": [
+				{
+					"id": "mQsrKC9p7CtcWzTeD",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "Almost everyone",
+					"cost_adj": "x1",
+					"disabled": true
+				},
+				{
+					"id": "mp0C_NYMKktqqQ-eB",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "Almost everyone except @large class of people@",
+					"cost_adj": "x2/3",
+					"disabled": true
+				},
+				{
+					"id": "mA1lbutTqYD38W-Vk",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "@Large class of people@",
+					"cost_adj": "x0.5",
+					"disabled": true
+				},
+				{
+					"id": "mMGjbmZt9iVgL4Ds9",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "the Turchin, and throughout the Neck",
+					"cost_adj": "x1/3"
+				},
+				{
+					"id": "mbMfBfaxmlcgIGy5D",
+					"name": "Recognized all the time",
+					"reference": "B28",
+					"cost_adj": "x1",
+					"disabled": true
+				},
+				{
+					"id": "mpD-p7ywcoED3vVIm",
+					"name": "Recognized sometimes",
+					"reference": "B28",
+					"local_notes": "10-",
+					"cost_adj": "x0.5",
+					"disabled": true
+				},
+				{
+					"id": "mmrUGKlqq9GHJG5CB",
+					"name": "Recognized occasionally",
+					"reference": "B28",
+					"local_notes": "7-",
+					"cost_adj": "x1/3",
+					"disabled": true
+				}
+			],
+			"points_per_level": 5,
+			"features": [
+				{
+					"type": "reaction_bonus",
+					"situation": "from others aware of your reputation",
+					"amount": 1,
+					"per_level": true
+				}
+			],
+			"round_down": true,
+			"can_level": true,
+			"levels": 3,
+			"calc": {
+				"points": 5,
+				"current_level": 3
+			}
+		},
+		{
+			"id": "tupO02AixTheQ28NQ",
+			"name": "Animal Companion",
+			"local_notes": "Loyal raven with its own stats, acting under GM control; may fight, scout, track, distract, or carry objects and messages. +1 to melee attacks while it is adjacent and engaged with the same foe. If it dies, the advantage and its 5 points are lost until the GM allows a new bond.",
+			"base_points": 5,
+			"calc": {
+				"points": 5
+			}
+		},
+		{
+			"id": "tt5HgJ36WUYGLJ19R",
+			"name": "Warg Dreams",
+			"local_notes": "Each night roll 1d6; on a 6 you slip into the raven. Quick Contest of Will: win and you control it (its body, your mind); lose and you only ride along behind its eyes. Return on a Will-4 roll, retried hourly or when someone shakes you awake; a Major Wound to the bird ends it and costs 1 FP. Will-4 after each episode or -1 to Influence rolls until a full night's sleep. Die while bonded and a fragment of you passes into the raven (+1 IQ, your attachments).",
+			"base_points": 5,
+			"calc": {
+				"points": 5
+			}
+		},
+		{
+			"id": "txT8V1Xwh4Wreh4Cf",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "tmp8yecgaZq9TOk59"
+			},
+			"name": "@Type@ Rank",
+			"reference": "B29",
+			"local_notes": "Rank 1 = Menkhu (line-knower), one of some two hundred. Yargachin (priest) is Rank 2 and costs 5 more - that is what the cut buys, and it is deferred, not refused. Full value in the Neck; Social Engineering p.16 -1/3 outside it. B29-30",
+			"tags": [
+				"Advantage",
+				"Social"
+			],
+			"replacements": {
+				"Type": "Religious"
+			},
+			"modifiers": [
+				{
+					"id": "m-vJ-wkJP_YrQENpN",
+					"name": "Replaces Status",
+					"reference": "B29",
+					"cost_adj": "5",
+					"affects": "levels_only",
+					"disabled": true
+				},
+				{
+					"id": "mKr4-rFMjf-1Ad2lp",
+					"name": "Courtesy",
+					"reference": "B29",
+					"cost_adj": "-4",
+					"affects": "levels_only",
+					"disabled": true
+				}
+			],
+			"points_per_level": 5,
+			"can_level": true,
+			"levels": 1,
+			"calc": {
+				"points": 5,
+				"current_level": 1
+			}
+		},
+		{
+			"id": "tmNZXTjZL2nIXpbkV",
+			"name": "Grip Mastery (Spear)",
+			"reference": "MA50",
+			"local_notes": "Free action, once per turn, before or after the maneuver: shift the spear between one- and two-handed grips, and/or into or out of a Defensive Grip (MA109-111). Buys the two-handed thrust (1d+1 imp instead of 1d, tripled at the vitals) and a standing +1 to Parry from the front, without ever spending a Ready. Does NOT cover the reach change - the * in the spear's Reach 1-2* is a separate Ready option (MA102). Specialised by weapon, so it does nothing for the bow, and nothing for the bow-to-spear swap; that is still Fast-Draw (Spear). DEPENDS on the buckler being strapped to the forearm rather than hand-gripped - RAW a buckler occupies a hand (B287) and this perk would be dead weight. Precedent for the strap: LTC2 p.19. Precedent for the perk on a spear fighter: MA Gladiators p.14, retiarius.",
+			"tags": [
+				"Advantage",
+				"Perk"
+			],
+			"base_points": 1,
+			"calc": {
+				"points": 1
+			}
+		},
+		{
+			"id": "ta6kTxb_s5t7wWkqB",
+			"name": "Language: Kesmen",
+			"reference": "B24",
+			"local_notes": "Kesmen (cut-lines), his native tongue, free. No written form - the language has no script. The Turchin are the people; Kesmen is what they speak.",
+			"calc": {
+				"points": 0
+			}
+		},
+		{
+			"id": "tpiBRVwTujngKBhKE",
+			"name": "Natural Attacks",
+			"reference": "B271",
+			"weapons": [
+				{
+					"id": "weoodvEzBZZCLle2i",
+					"sv": 1,
+					"damage": {
+						"type": "cr",
+						"st": "thr",
+						"base": "-1"
+					},
+					"usage": "Bite",
+					"reach": "C",
+					"defaults": [
+						{
+							"type": "dx"
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Brawling"
+							}
+						}
+					],
+					"calc": {
+						"level": 12,
+						"damage": "1d-3 cr"
+					}
+				},
+				{
+					"id": "wguR8HHrTrMw0Qwy7",
+					"sv": 1,
+					"damage": {
+						"type": "cr",
+						"st": "thr",
+						"base": "-1"
+					},
+					"usage": "Punch",
+					"reach": "C",
+					"parry": "0",
+					"defaults": [
+						{
+							"type": "dx"
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Boxing"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Brawling"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Karate"
+							}
+						}
+					],
+					"calc": {
+						"level": 12,
+						"damage": "1d-3 cr",
+						"parry": "9"
+					}
+				},
+				{
+					"id": "w4CQVyTW-a0QrzCd6",
+					"sv": 1,
+					"damage": {
+						"type": "cr",
+						"st": "thr"
+					},
+					"usage": "Kick",
+					"reach": "C,1",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -2
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Brawling"
+							},
+							"modifier": -2
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Kicking"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Karate"
+							},
+							"modifier": -2
+						}
+					],
+					"calc": {
+						"level": 10,
+						"damage": "1d-2 cr"
+					}
+				}
+			],
+			"calc": {
+				"points": 0
+			}
+		},
+		{
+			"id": "tSsIDcqgBTtzAgyh9",
+			"name": "Rehearses the cut",
+			"local_notes": "Every night, privately, with the tashyar in his hand and the lines already on him. He has never broken skin. He has told no one.",
+			"tags": [
+				"Quirk"
+			],
+			"base_points": -1,
+			"calc": {
+				"points": -1
+			}
+		},
+		{
+			"id": "tTJU4XylfDvYng1U4",
+			"name": "Counts the horn-tips",
+			"local_notes": "He counts what is on another man's cord before he speaks to him, and everyone notices him doing it.",
+			"tags": [
+				"Quirk"
+			],
+			"base_points": -1,
+			"calc": {
+				"points": -1
+			}
+		},
+		{
+			"id": "t7ieyznrcuT5YCWml",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "tTq2WezVZouDD4sFe"
+			},
+			"name": "Will not say 'when'",
+			"local_notes": "He cannot put the cut in the future tense out loud. It is always 'if the Bashchin allows it,' never 'when.' Men have started to notice.",
+			"tags": [
+				"Quirk"
+			],
+			"base_points": -1,
+			"calc": {
+				"points": -1
+			}
+		},
+		{
+			"id": "tSsvI5sURNq-2MPsl",
+			"name": "Distrusts a clean scar",
+			"local_notes": "Asks what closed it, and does not like the answer when it is 'nothing.'",
+			"tags": [
+				"Quirk"
+			],
+			"base_points": -1,
+			"calc": {
+				"points": -1
+			}
+		},
+		{
+			"id": "tNJGgmKjRWSCLOPlo",
+			"name": "Corrects the butchery",
+			"local_notes": "Aloud, unasked, to men who did not want to know. He cannot let a bad cut stand.",
+			"tags": [
+				"Quirk"
+			],
+			"base_points": -1,
+			"calc": {
+				"points": -1
+			}
+		},
+		{
+			"id": "tOU5gib985XEZxGe6",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "tj478Y8UdHYlqGNf2"
+			},
+			"name": "Bad Reputation",
+			"reference": "B26,MA54",
+			"local_notes": "-3 reactions from the southern North, the northern riverlands and the Vale. Small class of people (x1/3), so 3 levels cost -5 points. The pair is one multifaceted Reputation netting 0. B26-28",
+			"tags": [
+				"Disadvantage",
+				"Social"
+			],
+			"modifiers": [
+				{
+					"id": "mQB9CZtM1XL7ILPnm",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "Almost everyone",
+					"cost_adj": "x1",
+					"disabled": true
+				},
+				{
+					"id": "mQgGje_1slZQF9IuS",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "Almost everyone except @large class of people@",
+					"cost_adj": "x2/3",
+					"disabled": true
+				},
+				{
+					"id": "mlM-WWIMyeDJlwUUe",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "@Large class of people@",
+					"cost_adj": "x0.5",
+					"disabled": true
+				},
+				{
+					"id": "m9Nfxvwx5Wf1aC-aB",
+					"name": "People Affected",
+					"reference": "B27",
+					"local_notes": "the southern North, the northern riverlands and the Vale",
+					"cost_adj": "x1/3"
+				},
+				{
+					"id": "mpjYO1sq4qtmShDNI",
+					"name": "Recognized all the time",
+					"reference": "B28",
+					"cost_adj": "x1",
+					"disabled": true
+				},
+				{
+					"id": "mlNI0xPLbFndFus2S",
+					"name": "Recognized sometimes",
+					"reference": "B28",
+					"local_notes": "10-",
+					"cost_adj": "x0.5",
+					"disabled": true
+				},
+				{
+					"id": "mOt5vtU6Dll60tkU4",
+					"name": "Recognized occasionally",
+					"reference": "B28",
+					"local_notes": "7-",
+					"cost_adj": "x1/3",
+					"disabled": true
+				}
+			],
+			"points_per_level": -5,
+			"features": [
+				{
+					"type": "reaction_bonus",
+					"situation": "from others aware of your reputation",
+					"amount": -1,
+					"per_level": true
+				}
+			],
+			"can_level": true,
+			"levels": 3,
+			"calc": {
+				"points": -5,
+				"current_level": 3
+			}
+		},
+		{
+			"id": "tEJZb4tkAleOZlFSG",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "t1HUGl4o498iCyvrw"
+			},
+			"name": "Duty (@Duty@)",
+			"reference": "B133",
+			"local_notes": "Called to the grove when the herd is thin, when a Külyarga is wanted somewhere it has no business being performed, or when forty-one priests must stand in one place. He goes.",
+			"tags": [
+				"Disadvantage",
+				"Social"
+			],
+			"replacements": {
+				"Duty": "the Yarga"
+			},
+			"modifiers": [
+				{
+					"id": "Mj0nfAjCFkqJZhzsS",
+					"name": "Frequency",
+					"children": [
+						{
+							"id": "mNOIsy4nln4ChGyeA",
+							"name": "Quite rarely",
+							"local_notes": "6-",
+							"cost_adj": "-2",
+							"disabled": true
+						},
+						{
+							"id": "me6d4OmtvXBBFf1I5",
+							"name": "Fairly often",
+							"local_notes": "9-",
+							"cost_adj": "-5"
+						},
+						{
+							"id": "mQbdS1_NDXIpJsDz2",
+							"name": "Quite often",
+							"local_notes": "12-",
+							"cost_adj": "-10",
+							"disabled": true
+						},
+						{
+							"id": "mdFcqZm9tAsXoCxoj",
+							"name": "Almost all the time",
+							"local_notes": "15- or always on duty",
+							"cost_adj": "-15",
+							"disabled": true
+						}
+					]
+				},
+				{
+					"id": "misi_VpkNq8LGn4-3",
+					"name": "Extremely Hazardous",
+					"cost_adj": "-5",
+					"disabled": true
+				},
+				{
+					"id": "mQP9bjfs9rfd7TxRl",
+					"name": "Involuntary",
+					"cost_adj": "-5",
+					"disabled": true
+				},
+				{
+					"id": "mnvKL9if2GK0x6d26",
+					"name": "Nonhazardous",
+					"cost_adj": "5",
+					"disabled": true
+				}
+			],
+			"calc": {
+				"points": -5
+			}
+		},
+		{
+			"id": "tKVDJ3K-xSki-n0Do",
+			"name": "Vow (Minor)",
+			"local_notes": "The fifth yasakh: he may not name the opened, living or dead, ever again. He calls them by the wound, or by what he found inside them. B160",
+			"base_points": -5,
+			"calc": {
+				"points": -5
+			}
+		},
+		{
+			"id": "tX0yGr9De7Wxy9ZtH",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Traits.adq",
+				"id": "t9CbY1uCmgSV0FolN"
+			},
+			"name": "Disciplines of Faith (Ritualism)",
+			"reference": "B132",
+			"local_notes": "The first yasakh: nothing whole. He may put nothing into his body that has not been opened first by his own hand. The second yasakh (he may not eat the beast he opened, at the Ashkun) binds the officiant at the Qanyarga and is dormant until he is Yargachin. B132",
+			"tags": [
+				"Disadvantage",
+				"Mental"
+			],
+			"base_points": -5,
+			"calc": {
+				"points": -5
+			}
+		},
+		{
+			"id": "t8X5UTiAr4DiqJ-Xo",
+			"name": "Vow (Major)",
+			"local_notes": "The sixth yasakh: he may not sleep on hard ground. Turokh (the Earth) is underneath, and where the ground is hard he is not there to lie on. B160",
+			"base_points": -10,
+			"calc": {
+				"points": -10
+			}
+		},
+		{
+			"id": "tdRbcttmVghM8VcFT",
+			"name": "Sense of Duty (the Turchin)",
+			"base_points": -10,
+			"calc": {
+				"points": -10
+			}
+		},
+		{
+			"id": "tBxQJcSRURX3E-lAf",
+			"name": "Vow (Great)",
+			"local_notes": "The third and fourth yasakh (that-which-is-forbidden): he may not open a body unasked, and he may not refuse a request to open a living body. Binds the opener, so it binds a Menkhu. Any character who says it aloud has compelled him. B160",
+			"base_points": -15,
+			"calc": {
+				"points": -15
+			}
+		}
+	],
+	"skills": [
+		{
+			"id": "sU3-t1E9yl1E581hQ",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sVa9gXF-NnYK9vQkh"
+			},
+			"name": "Poisons",
+			"reference": "B214",
+			"tags": [
+				"Criminal",
+				"Medical",
+				"Spy",
+				"Street"
+			],
+			"difficulty": "iq/h",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -6
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Chemistry"
+					},
+					"modifier": -5
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Pharmacy"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Physician"
+					},
+					"modifier": -3
+				}
+			],
+			"tech_level": "",
+			"points": 8,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -6,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "IQ+1"
+			}
+		},
+		{
+			"id": "sf9Uf7f7EmQioEQ3D",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sC3Hao70ucDyPFMyx"
+			},
+			"name": "Esoteric Medicine",
+			"reference": "B192,MA56",
+			"tags": [
+				"Esoteric",
+				"Medical"
+			],
+			"specialization": "Menkhu",
+			"difficulty": "per/h",
+			"defaults": [
+				{
+					"type": "per",
+					"modifier": -6
+				}
+			],
+			"points": 4,
+			"defaulted_from": {
+				"type": "per",
+				"modifier": -6,
+				"level": 9,
+				"adjusted_level": 9,
+				"points": -9
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "Per+0"
+			}
+		},
+		{
+			"id": "s1SJd36jSlBbtL4FT",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "s3rs5bVG0nxQSZEGS"
+			},
+			"name": "Tracking",
+			"reference": "B226",
+			"tags": [
+				"Exploration",
+				"Outdoor"
+			],
+			"difficulty": "per/a",
+			"defaults": [
+				{
+					"type": "per",
+					"modifier": -5
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Naturalist"
+					},
+					"modifier": -5
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "per",
+				"modifier": -5,
+				"level": 10,
+				"adjusted_level": 10,
+				"points": -10
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "Per+0"
+			}
+		},
+		{
+			"id": "sDjLUzGiaiDwyOXVQ",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "s6Yn2IClGb4i4LgOQ"
+			},
+			"name": "Observation",
+			"reference": "B211",
+			"tags": [
+				"Criminal",
+				"Military",
+				"Police",
+				"Spy",
+				"Street"
+			],
+			"difficulty": "per/a",
+			"defaults": [
+				{
+					"type": "per",
+					"modifier": -5
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Shadowing"
+					},
+					"modifier": -5
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "per",
+				"modifier": -5,
+				"level": 10,
+				"adjusted_level": 10,
+				"points": -10
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "Per+0"
+			}
+		},
+		{
+			"id": "sTwdiK5iVWMgxHioN",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sKtd60c-jdtMDfOIt"
+			},
+			"name": "Camouflage",
+			"reference": "B183",
+			"tags": [
+				"Exploration",
+				"Military",
+				"Outdoor"
+			],
+			"difficulty": "iq/e",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -4
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"modifier": -2
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "skill",
+				"name": {
+					"compare": "is",
+					"qualifier": "Survival"
+				},
+				"specialization": {
+					"compare": "is",
+					"qualifier": "Swampland"
+				},
+				"modifier": -2,
+				"level": 13,
+				"adjusted_level": 13,
+				"points": -13
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "IQ+1"
+			}
+		},
+		{
+			"id": "s2dRCbpSOPhjVX_rC",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "syX-Ln3AQouipZBJb"
+			},
+			"name": "Survival",
+			"reference": "B223",
+			"tags": [
+				"Exploration",
+				"Outdoor"
+			],
+			"specialization": "Swampland",
+			"difficulty": "per/a",
+			"defaults": [
+				{
+					"type": "per",
+					"modifier": -6
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Naturalist"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "River/Stream"
+					},
+					"modifier": -4
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Arctic"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Desert"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Jungle"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Mountain"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Plains"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Island/Beach"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Survival"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Woodlands"
+					},
+					"modifier": -3
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "skill",
+				"name": {
+					"compare": "is",
+					"qualifier": "Naturalist"
+				},
+				"specialization": {
+					"compare": "is",
+					"qualifier": "Earthlike"
+				},
+				"modifier": -3,
+				"level": 10,
+				"adjusted_level": 10,
+				"points": -10
+			},
+			"calc": {
+				"level": 15,
+				"rsl": "Per+0"
+			}
+		},
+		{
+			"id": "sQ73azdzYXIuIZlio",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sgrDrFiOdLC9njqnC"
+			},
+			"name": "Surgery",
+			"reference": "B223",
+			"local_notes": "The -5 for lack of Physician is bought off by Esoteric Medicine (Menkhu) at 12+, which substitutes for Physician. LT p.11",
+			"tags": [
+				"Medical"
+			],
+			"difficulty": "iq/vh",
+			"defaults": [
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "First Aid"
+					},
+					"modifier": -12
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Physician"
+					},
+					"modifier": -5
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Physiology"
+					},
+					"modifier": -8
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Veterinary"
+					},
+					"modifier": -5
+				}
+			],
+			"points": 8,
+			"calc": {
+				"level": 14,
+				"rsl": "IQ+0"
+			}
+		},
+		{
+			"id": "st-aIJoQceF4-T__2",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "svEm7OyeCu_9wJ8Kk"
+			},
+			"name": "Stealth",
+			"reference": "B222",
+			"tags": [
+				"Criminal",
+				"Police",
+				"Spy",
+				"Street"
+			],
+			"difficulty": "dx/a",
+			"encumbrance_penalty_multiplier": 1,
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -5
+				},
+				{
+					"type": "dx",
+					"modifier": -5
+				}
+			],
+			"points": 8,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -5,
+				"level": 9,
+				"adjusted_level": 9,
+				"points": -9
+			},
+			"calc": {
+				"level": 14,
+				"rsl": "DX+2"
+			}
+		},
+		{
+			"id": "Sjj3Skr06jC0nmHcX",
+			"name": "Skill Container",
+			"children": [
+				{
+					"id": "sFstat4lZAbzm_DX1",
+					"source": {
+						"library": "richardwilkes/gcs_master_library",
+						"path": "Basic Set/Basic Set Skills.skl",
+						"id": "sqoFTojrz-FYO-VNK"
+					},
+					"name": "Bow",
+					"reference": "B182",
+					"tags": [
+						"Combat",
+						"Ranged Combat",
+						"Weapon"
+					],
+					"difficulty": "dx/a",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -5
+						}
+					],
+					"points": 8,
+					"defaulted_from": {
+						"type": "dx",
+						"modifier": -5,
+						"level": 7,
+						"adjusted_level": 7,
+						"points": -7
+					},
+					"calc": {
+						"level": 14,
+						"rsl": "DX+2"
+					}
+				},
+				{
+					"id": "sa8aSCyDHxDVHKGL2",
+					"source": {
+						"library": "richardwilkes/gcs_master_library",
+						"path": "Basic Set/Basic Set Skills.skl",
+						"id": "sGZIS74r72pQZ7Ayv"
+					},
+					"name": "Spear",
+					"reference": "B208",
+					"tags": [
+						"Combat",
+						"Melee Combat",
+						"Weapon"
+					],
+					"difficulty": "dx/a",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -5
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Polearm"
+							},
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Staff"
+							},
+							"modifier": -2
+						}
+					],
+					"points": 8,
+					"defaulted_from": {
+						"type": "dx",
+						"modifier": -5,
+						"level": 7,
+						"adjusted_level": 7,
+						"points": -7
+					},
+					"calc": {
+						"level": 14,
+						"rsl": "DX+2"
+					}
+				}
+			]
+		},
+		{
+			"id": "s_gWkrTdMe_OV0ASm",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sxg-_yrzuGL19d-m8"
+			},
+			"name": "Shield",
+			"reference": "B220",
+			"tags": [
+				"Combat",
+				"Melee Combat",
+				"Weapon"
+			],
+			"specialization": "Buckler",
+			"difficulty": "dx/e",
+			"defaults": [
+				{
+					"type": "dx",
+					"modifier": -4
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Shield"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "Force"
+					},
+					"modifier": -2
+				}
+			],
+			"points": 4,
+			"defaulted_from": {
+				"type": "dx",
+				"modifier": -4,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 14,
+				"rsl": "DX+2"
+			}
+		},
+		{
+			"id": "ssHgf6qBei61tw49y",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "scZAN2KsmWIajEzSR"
+			},
+			"name": "Fortune-Telling",
+			"reference": "B196",
+			"tags": [
+				"Social"
+			],
+			"specialization": "Haruspicy",
+			"difficulty": "iq/a",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -5
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Fast-Talk"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Occultism"
+					},
+					"modifier": -3
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -5,
+				"level": 9,
+				"adjusted_level": 9,
+				"points": -9
+			},
+			"calc": {
+				"level": 14,
+				"rsl": "IQ+0"
+			}
+		},
+		{
+			"id": "qOjp2knMpcRJhQ18q",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Martial Arts/Martial Arts Skills.skl",
+				"id": "q9-hbfNEGLwZ9u-f9"
+			},
+			"name": "Targeted Attack (@Skill@ @Attack@/Vitals)",
+			"reference": "MA68",
+			"local_notes": "Hard technique, default Spear-3, bought to the cap. Vitals is -3 to hit and triples impaling damage. B399",
+			"tags": [
+				"Combat",
+				"Melee Combat",
+				"Technique",
+				"Weapon"
+			],
+			"replacements": {
+				"Attack": "Thrust",
+				"Skill": "Spear"
+			},
+			"difficulty": "h",
+			"default": {
+				"type": "skill",
+				"name": {
+					"compare": "is",
+					"qualifier": "@Skill@"
+				},
+				"modifier": -3
+			},
+			"limit": -1,
+			"points": 3,
+			"calc": {
+				"level": 13,
+				"rsl": "-1"
+			}
+		},
+		{
+			"id": "qo4FeZmNkKdMx8NzG",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Martial Arts/Martial Arts Skills.skl",
+				"id": "q9-hbfNEGLwZ9u-f9"
+			},
+			"name": "Targeted Attack (@Skill@ @Attack@/Vitals)",
+			"reference": "MA68",
+			"local_notes": "Hard technique, default Bow-3 = 11, bought to the cap. Erases the vitals penalty on the opening shot; impaling triples at the vitals. B399",
+			"tags": [
+				"Combat",
+				"Ranged Combat",
+				"Technique",
+				"Weapon"
+			],
+			"replacements": {
+				"Attack": "Shot",
+				"Skill": "Bow"
+			},
+			"difficulty": "h",
+			"default": {
+				"type": "skill",
+				"name": {
+					"compare": "is",
+					"qualifier": "@Skill@"
+				},
+				"modifier": -3
+			},
+			"limit": -1,
+			"points": 3,
+			"calc": {
+				"level": 13,
+				"rsl": "-1"
+			}
+		},
+		{
+			"id": "sxY770xniu_-_irI4",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sJCoMrY7lztfm6mBX"
+			},
+			"name": "Naturalist",
+			"reference": "B211",
+			"local_notes": "Finding the plants, and the leeches.",
+			"tags": [
+				"Animal",
+				"Exploration",
+				"Natural Science",
+				"Outdoor",
+				"Plant"
+			],
+			"specialization": "Earthlike",
+			"difficulty": "iq/h",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -6
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Biology"
+					},
+					"modifier": -3
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -6,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 13,
+				"rsl": "IQ-1"
+			}
+		},
+		{
+			"id": "svPXAJSHthikwyDQq",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "s0OrRdzDLyXnfmwj9"
+			},
+			"name": "Religious Ritual",
+			"reference": "B217",
+			"local_notes": "a successful Religious Ritual roll gives +2 to reactions when dealing with the faithful",
+			"tags": [
+				"Magical",
+				"Occult"
+			],
+			"replacements": {
+				"Specialty": "Turchin"
+			},
+			"specialization": "Turchin",
+			"difficulty": "iq/h",
+			"defaults": [
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Ritual Magic"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "@Specialty@"
+					},
+					"modifier": -6
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Theology"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "@Specialty@"
+					},
+					"modifier": -4
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "skill",
+				"name": {
+					"compare": "is",
+					"qualifier": "Theology"
+				},
+				"specialization": {
+					"compare": "is",
+					"qualifier": "Turchin"
+				},
+				"modifier": -4,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 13,
+				"rsl": "IQ-1"
+			}
+		},
+		{
+			"id": "s0mjErCL7ThyKHrVv",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Action/Action Skills.skl",
+				"id": "skGjbJd_2P9136deW"
+			},
+			"name": "Jumping",
+			"reference": "B203",
+			"tags": [
+				"Athletic"
+			],
+			"difficulty": "dx/e",
+			"points": 2,
+			"calc": {
+				"level": 13,
+				"rsl": "DX+1"
+			}
+		},
+		{
+			"id": "sP7t4GDzkiRondS-d",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sQ9Hv-SvAISrf1vW8"
+			},
+			"name": "Animal Handling",
+			"reference": "B175",
+			"tags": [
+				"Animal"
+			],
+			"replacements": {
+				"Specialty": "Birds"
+			},
+			"specialization": "Birds",
+			"difficulty": "iq/a",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -5
+				}
+			],
+			"points": 1,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -5,
+				"level": 9,
+				"adjusted_level": 9,
+				"points": -9
+			},
+			"calc": {
+				"level": 13,
+				"rsl": "IQ-1"
+			}
+		},
+		{
+			"id": "sxzYjUy9DVwgMTrVi",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sx1CDkGBR830IZrmz"
+			},
+			"name": "Professional Skill",
+			"reference": "B215",
+			"local_notes": "Dropped to 1 point on 2026-08-18 to pay for Grip Mastery (Spear). Surgery-14 and Esoteric Medicine (Menkhu)-15 cover the anatomy; nothing in canon turns on 14 vs 13 here.",
+			"tags": [
+				"Knowledge"
+			],
+			"replacements": {
+				"Mental Skill": "Butcher"
+			},
+			"specialization": "Butcher",
+			"difficulty": "iq/a",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -5
+				}
+			],
+			"points": 1,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -5,
+				"level": 9,
+				"adjusted_level": 9,
+				"points": -9
+			},
+			"calc": {
+				"level": 13,
+				"rsl": "IQ-1"
+			}
+		},
+		{
+			"id": "sn5XDmL2OJTim_8JB",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Action/Action Skills.skl",
+				"id": "sbyTOPVwy04zAcEox"
+			},
+			"name": "Climbing",
+			"reference": "B183",
+			"tags": [
+				"Athletic",
+				"Criminal",
+				"Exploration",
+				"Outdoor",
+				"Street"
+			],
+			"difficulty": "dx/a",
+			"encumbrance_penalty_multiplier": 1,
+			"defaults": [
+				{
+					"type": "dx",
+					"modifier": -5
+				}
+			],
+			"points": 2,
+			"defaulted_from": {
+				"type": "dx",
+				"modifier": -5,
+				"level": 7,
+				"adjusted_level": 7,
+				"points": -7
+			},
+			"calc": {
+				"level": 12,
+				"rsl": "DX+0"
+			}
+		},
+		{
+			"id": "s3cZ0lU_bakFBpE92",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "slOONrK6jDHvcRoGx"
+			},
+			"name": "Knife",
+			"reference": "B208",
+			"local_notes": "The only close-work tool. Poison the point.",
+			"tags": [
+				"Combat",
+				"Melee Combat",
+				"Weapon"
+			],
+			"difficulty": "dx/e",
+			"defaults": [
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Force Sword"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Main-Gauche"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Shortsword"
+					},
+					"modifier": -3
+				},
+				{
+					"type": "dx",
+					"modifier": -4
+				}
+			],
+			"points": 1,
+			"defaulted_from": {
+				"type": "dx",
+				"modifier": -4,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 12,
+				"rsl": "DX+0"
+			}
+		},
+		{
+			"id": "sBcqSw0VF1WXiNdcM",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sxpRrrGDJlHzh1VyN"
+			},
+			"name": "Fast-Draw",
+			"reference": "B194,MA56",
+			"local_notes": "Cuts one second off every reload. The bow is Shots 1(2).",
+			"tags": [
+				"Combat",
+				"Ranged Combat",
+				"Weapon"
+			],
+			"specialization": "Arrow",
+			"difficulty": "dx/e",
+			"points": 1,
+			"calc": {
+				"level": 12,
+				"rsl": "DX+0"
+			}
+		},
+		{
+			"id": "sAeJmHr2wVgYmNlws",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "s5xh6bANmCGbYersa"
+			},
+			"name": "Fast-Draw",
+			"reference": "B194,MA56",
+			"local_notes": "GM-approved specialty, B195. Works from a sling or rack, not the ground.",
+			"tags": [
+				"Combat",
+				"Ranged Combat",
+				"Weapon"
+			],
+			"replacements": {
+				"Specialization": "Spear"
+			},
+			"specialization": "Spear",
+			"difficulty": "dx/e",
+			"points": 1,
+			"calc": {
+				"level": 12,
+				"rsl": "DX+0"
+			}
+		},
+		{
+			"id": "ssDK0vzZAa27Si6bV",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Skills.skl",
+				"id": "sMIRD7ORV8Bmze6Af"
+			},
+			"name": "Theology",
+			"reference": "B226",
+			"tags": [
+				"Humanities",
+				"Social Sciences"
+			],
+			"replacements": {
+				"Specialty": "Turchin"
+			},
+			"specialization": "Turchin",
+			"difficulty": "iq/h",
+			"defaults": [
+				{
+					"type": "iq",
+					"modifier": -6
+				},
+				{
+					"type": "skill",
+					"name": {
+						"compare": "is",
+						"qualifier": "Religious Ritual"
+					},
+					"specialization": {
+						"compare": "is",
+						"qualifier": "@Specialty@"
+					},
+					"modifier": -4
+				}
+			],
+			"points": 1,
+			"defaulted_from": {
+				"type": "iq",
+				"modifier": -6,
+				"level": 8,
+				"adjusted_level": 8,
+				"points": -8
+			},
+			"calc": {
+				"level": 12,
+				"rsl": "IQ-2"
+			}
+		}
+	],
+	"equipment": [
+		{
+			"id": "Et0bRTzaIEVIXAlQi",
+			"description": "Backpack",
+			"legality_class": "4",
+			"quantity": 1,
+			"equipped": true,
+			"children": [
+				{
+					"id": "EeBidMeu7scIX-zhc",
+					"description": "Metabackpack",
+					"legality_class": "4",
+					"quantity": 1,
+					"equipped": true,
+					"children": [
+						{
+							"id": "eMNPcBPVkCDd_WRHP",
+							"description": "The Book of Lines",
+							"local_notes": "A gathering of scraped vellum in a hide cover, kept against the yarqap. Westerosi, because Kesmen (cut-lines) has no script — a small square hand that stopped improving at eleven.",
+							"legality_class": "4",
+							"quantity": 1,
+							"equipped": true,
+							"calc": {
+								"value": 0,
+								"extended_value": 0,
+								"weight": "0 lb",
+								"extended_weight": "0 lb"
+							}
+						}
+					],
+					"calc": {
+						"value": 0,
+						"extended_value": 0,
+						"weight": "0 lb",
+						"extended_weight": "0 lb"
+					}
+				},
+				{
+					"id": "eV5VApxpWKHkXCuu2",
+					"description": "Horn-tip and tooth on a cord",
+					"local_notes": "One horn from a Qanyarga, one tooth from a Külyarga. Nineteen years old, standing among men who sound like a bone-yard in a wind. Men count them before they speak.",
+					"legality_class": "4",
+					"quantity": 1,
+					"equipped": true,
+					"calc": {
+						"value": 0,
+						"extended_value": 0,
+						"weight": "0 lb",
+						"extended_weight": "0 lb"
+					}
+				}
+			],
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0 lb",
+				"extended_weight": "0 lb"
+			}
+		},
+		{
+			"id": "ed3RQvtTljPJkjcih",
+			"description": "Yarqap",
+			"local_notes": "Splitting-vessel — the hide roll of knapped stone tashyar he intends to cut himself with at Umakhtamar. Stone rather than bronze is practice, not prohibition; the metal ban was never law. ~1 lb.",
+			"legality_class": "4",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0 lb",
+				"extended_weight": "0 lb"
+			}
+		},
+		{
+			"id": "ecXIHnn7j2OcBXw2Q",
+			"description": "The Bosbash",
+			"local_notes": "the aurochs-skull mask, cracked across the left orbit. Custom, no weight worth tracking\n\nIssued, not owned — masks belong to the office. Under it he is not Störm but Turkes, and what he says cannot be held against him afterward.",
+			"legality_class": "4",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0 lb",
+				"extended_weight": "0 lb"
+			}
+		},
+		{
+			"id": "eHCf-pmaPqB-J35Iy",
+			"description": "The maggot-horn",
+			"local_notes": "Used to clean rot out of a wound that has already gone bad. The maggots eat dead flesh and stop at living flesh, which no blade can be trusted to do. Needs four days' notice to breed a fresh batch.\n\nA lidded ox horn, kept damp, kept away from the food, never opened upwind. Blown on purpose by bog-flies onto a scrap of liver.\n\nNothing he carries is more orthodox — they open, and they are incapable of closing — and nothing empties a southern tent faster. Southerners let him do it exactly once.",
+			"legality_class": "4",
+			"base_weight": "0.1 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.1 lb",
+				"extended_weight": "0.1 lb"
+			}
+		},
+		{
+			"id": "e92vJM9iRyA0tt1Pn",
+			"description": "Cupping horn",
+			"local_notes": "Used to draw blood and fluid up to the surface: deep bruising, a chest that will not clear, an abscess that will not come up. Warmed and set on the skin. Leeches do the same work wherever there is standing water.\n\nA small ox horn with the tip cut open. A bruise raised on purpose over a deeper hurt.\n\nDrawing out is the whole of his medicine. Everything he does to a body he can name; what the body does afterwards is the body's business, and he has decided, privately and without asking anyone, that it is not his.",
+			"legality_class": "4",
+			"base_weight": "0.15 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.15 lb",
+				"extended_weight": "0.15 lb"
+			}
+		},
+		{
+			"id": "e_BE4G60dIGRD2zOr",
+			"description": "Burnisher and tine",
+			"local_notes": "Used to put the edge back on bronze and to press stone tools sharp again. Bronze is cold-worked hard with the pebble, not ground; the antler tine pressure-flakes stone.\n\nA smooth river pebble and an antler tine, in one fold of hide.\n\nThe tine is for the other roll. Every night he takes out the tashyar (stone-splitter) he has not used, presses the edges up sharper than anything in the kesqap (cutting-vessel), and puts them away.\n\nThe quirk 'Rehearses the cut' has a physical object. This is it.",
+			"legality_class": "4",
+			"base_weight": "0.15 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.15 lb",
+				"extended_weight": "0.15 lb"
+			}
+		},
+		{
+			"id": "eOzkq7i5uESG2IgrE",
+			"description": "Arrow-kit",
+			"local_notes": "Used to straighten warped shafts, replace lost fletching, and reseat heads that have worked loose. Keeps thirty-five arrows flying true.\n\nAn antler shaft-wrench, spare fletching in gut, sinew, and a small pot of pine pitch kept hard and warmed at the fire.\n\nThirty-five barbed heads are thirty-five things nobody sells him. He straightens and refletches most evenings he is not doing something else, which is most evenings. A shaft that flies wide is a dose of belladonna lost in the mud.",
+			"legality_class": "4",
+			"base_weight": "0.2 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.2 lb",
+				"extended_weight": "0.2 lb"
+			}
+		},
+		{
+			"id": "eAk7sfRykryjtPQIn",
+			"description": "Needle-case, thongs, grease",
+			"local_notes": "Used to mend and waterproof clothing, boots and hood. The tallow keeps hide and wool from rotting through; the wood-ash and stale water strips wool that has gone foul.\n\nA bird-bone tube stoppered with wax: bone needles, sinew thread, spare hide thongs. A horn of rendered tallow beside it.\n\nHooded hide over wool that has been wet for a decade does not last a decade unattended. He greases it the way other men clean armour, and he is exact about it, and it still smells like the bog, because that is what it is.",
+			"legality_class": "4",
+			"base_weight": "0.2 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.2 lb",
+				"extended_weight": "0.2 lb"
+			}
+		},
+		{
+			"id": "eBHGQMAC8L2oupdq-",
+			"description": "Poison doses in sealed gut",
+			"local_notes": "belladonna and viper venom (5/5)\n\nBelladonna allows no resistance roll on its first cycle. One dose per strike, or three blocked or parried; one per arrow. It only fires if the attack gets through DR.",
+			"legality_class": "4",
+			"base_weight": "0.1",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.2 lb",
+				"extended_weight": "0.2 lb"
+			}
+		},
+		{
+			"id": "eIAv7qjq-oZoFc4sF",
+			"description": "Bog moss, and the herb-gut under it",
+			"local_notes": "Used to pack and cover a dressed wound. The moss absorbs and keeps the wound sweet for a day and a night; the willow bark under it is chewed for pain and fever, the bog myrtle burned or rubbed on against flies. A Naturalist roll replaces the whole bag anywhere there is standing water.\n\nSphagnum, dried, in a net bag that weighs nothing and drinks four times its own weight.\n\nAll three grow within a mile of anywhere he has ever slept. It is the only medicine he owns that he has never had to ask a living man for, and he is unsentimental about the rest for exactly that reason.",
+			"legality_class": "4",
+			"base_weight": "0.2 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.2 lb",
+				"extended_weight": "0.2 lb"
+			}
+		},
+		{
+			"id": "eB4dAPtwP9Cm7JhgX",
+			"description": "Yarilmaz — honey, sealed in gut",
+			"local_notes": "Used to dress an open wound, laid on after the wine and under the moss. Does not spoil, ever, and so is the one medicine that keeps as long as the road does.\n\nThat-which-will-not-open. A hand's weight of it, going brown.\n\nIt does not rot, does not sour, does not part. A vessel of it opened after a hundred years is still honey — the most whole thing he has ever handled, and the best thing in the world to lay on an opened wound. He has never resolved that, and he does not raise it.\n\nUnder the 1st yasakh nothing whole enters him unopened, so every dose is cut with water or sour wine first, aloud, by name, before it touches a patient or his own mouth. It takes him longer than it takes anybody else. The men have started timing it.",
+			"legality_class": "4",
+			"base_weight": "0.25 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.25 lb",
+				"extended_weight": "0.25 lb"
+			}
+		},
+		{
+			"id": "eezJhld18jvPPDQbl",
+			"description": "Ashtash — food-stone",
+			"local_notes": "Used as travel rations. One cake is a day's walking. Keeps a season without spoiling and needs no cooking.\n\nDried eel, waterfowl and smoked hare pounded into rendered fat with bog cranberry and crowberry, pressed into cakes and wrapped in gut. Hard enough to have earned the name.\n\nUnder the 1st yasakh it cannot be eaten whole, so every cake is cut before it is eaten, always across the same line, and the halves are never laid back together on one board.",
+			"legality_class": "4",
+			"base_weight": "0.25 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.25 lb",
+				"extended_weight": "0.25 lb"
+			}
+		},
+		{
+			"id": "eDtmHMcBssR1R78n2",
+			"description": "Sour wine, in a stopped horn",
+			"local_notes": "Used to wash a wound before anything else touches it, and to thin the honey to a working consistency. Drinkable at need.\n\nTraded up out of the south and worth more than his knife.\n\nIt goes onto the wound first and it bites, and the biting is the point: it opens where it lands. What is left cuts the honey. What is left after that is drunk in mouthfuls too small to be hospitality.\n\nThe only medicine in the roll his doctrine has never had to argue with.",
+			"legality_class": "4",
+			"base_weight": "0.4 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.4 lb",
+				"extended_weight": "0.4 lb"
+			}
+		},
+		{
+			"id": "ej4fnujjvNojkOOEO",
+			"description": "Bow-case, spare strings, wax",
+			"local_notes": "Used to keep the reflex bow dry and to replace a string that has stretched or parted. Three spares. A composite bow left wet comes apart at the glue and cannot be repaired in the field.\n\nA greased hide sleeve. In a fold of it, three strings of twisted sinew carried against his skin under the wool where they stay dry, and a lump of beeswax cut with tallow to dress them.\n\nA reflex bow is horn and sinew laid up with hide glue, and hide glue dissolves in water, and he lives in a bog. It comes out to be strung and goes back the moment it is not wanted. He watched a better bow than his come apart over one wet autumn and has not been casual since.",
+			"legality_class": "4",
+			"base_weight": "0.4 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.4 lb",
+				"extended_weight": "0.4 lb"
+			}
+		},
+		{
+			"id": "elJehlDIKtfrccwbt",
+			"description": "Kesqap",
+			"local_notes": "Used to cut, probe, stitch and dress a living body. This is the surgical kit: without one, Surgery and Esoteric Medicine are improvised at -2 or worse (B424). It grants no bonus — its absence is the penalty.\n\nCutting-vessel, and not the yarqap (splitting-vessel). Bronze lancets, a bronze probe, a horn spoon, bone needles, sinew, boiled linen in a coil.\n\nBronze, because a bronze edge can be burnished hard again on a river stone in the field and knapped stone cannot be re-struck by firelight. The stone in the yarqap is for himself and has never touched anyone. This roll is for everyone else, and is opened most days.",
+			"legality_class": "4",
+			"base_weight": "0.45 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.45 lb",
+				"extended_weight": "0.45 lb"
+			}
+		},
+		{
+			"id": "e1e3zLMiOETupnfwP",
+			"description": "Quivers",
+			"reference": "B289",
+			"local_notes": "(10 Arrows)\n\nArrows he can reach without looking. Poisoned one at a time and kept apart, because a dose on the wrong shaft is a dose gone. Barbed - causes half the damage it took coming in when taken out.",
+			"legality_class": "4",
+			"base_weight": "0.5 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0.5 lb",
+				"extended_weight": "0.5 lb"
+			}
+		},
+		{
+			"id": "eLg2wiSXL2MVkkTBF",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Low Tech/Low Tech Equipment.eqp",
+				"id": "eRUOgLIAMZRqLWlbk"
+			},
+			"description": "Large Knife",
+			"reference": "B272",
+			"local_notes": "Bronze. A tool, not an answer — 1d-2 either way. What he uses on a sentry now that the garrote is gone, and what he opens things with when the tashyar would be a blasphemy.",
+			"tech_level": "0",
+			"tags": [
+				"Melee Weapon",
+				"Missile Weapon"
+			],
+			"base_value": "40",
+			"base_weight": "1 lb",
+			"weapons": [
+				{
+					"id": "wzdWZzVdlMLlzXl_8",
+					"sv": 1,
+					"damage": {
+						"type": "cut",
+						"st": "sw",
+						"base": "-2"
+					},
+					"strength": "6",
+					"usage": "Swung",
+					"reach": "C,1",
+					"parry": "-1",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Knife"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Force Sword"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Main-Gauche"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shortsword"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Sword!"
+							}
+						}
+					],
+					"calc": {
+						"level": 12,
+						"damage": "1d-2 cut",
+						"parry": "8"
+					}
+				},
+				{
+					"id": "w8yZEXfej13sfcab6",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr"
+					},
+					"strength": "6",
+					"usage": "Thrust",
+					"reach": "C",
+					"parry": "-1",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Knife"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Force Sword"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Main-Gauche"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shortsword"
+							},
+							"modifier": -3
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Sword!"
+							}
+						}
+					],
+					"calc": {
+						"level": 12,
+						"damage": "1d-2 imp",
+						"parry": "8"
+					}
+				},
+				{
+					"id": "WPKRlpGGwsdxIk6MU",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr"
+					},
+					"strength": "6",
+					"usage": "Thrown",
+					"range": "x0.8/x1.5",
+					"rate_of_fire": "1",
+					"shots": "T",
+					"bulk": "-2",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Thrown Weapon"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Knife"
+							}
+						}
+					],
+					"calc": {
+						"level": 8,
+						"damage": "1d-2 imp",
+						"range": "8/15"
+					}
+				}
+			],
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 40,
+				"extended_value": 40,
+				"weight": "1 lb",
+				"extended_weight": "1 lb"
+			}
+		},
+		{
+			"id": "eQvR7mN2xLkT4bH9c",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Equipment.eqp",
+				"id": "e63Ia0RA0wpWsFO7Y"
+			},
+			"description": "Arrow",
+			"reference": "B276",
+			"tech_level": "0",
+			"tags": [
+				"AmmoType:Arrow",
+				"Ammunition",
+				"Missile Weapon"
+			],
+			"base_value": "2",
+			"base_weight": "0.1 lb",
+			"quantity": 10,
+			"equipped": true,
+			"calc": {
+				"value": 2,
+				"extended_value": 20,
+				"weight": "0.1 lb",
+				"extended_weight": "1 lb"
+			}
+		},
+		{
+			"id": "ewKXrohLGQAX4yeYZ",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Low Tech/Low Tech Equipment.eqp",
+				"id": "e2hF_R9vE532_PYrY"
+			},
+			"description": "Parrying Buckler",
+			"reference": "LT114",
+			"local_notes": "Old bronze with an exterior of joined aurochs horns, tapering to rounded points, the central grip its widest part. DB 1 and another +1 to Block on top (LT116). Two pounds against a shield's fifteen — which is the whole reason he stays at No Encumbrance in a swamp.",
+			"tech_level": "0",
+			"tags": [
+				"Shield"
+			],
+			"base_value": "50",
+			"base_weight": "2 lb",
+			"weapons": [
+				{
+					"id": "wg546Qk15cB-n1pYU",
+					"sv": 1,
+					"damage": {
+						"type": "cr",
+						"st": "thr"
+					},
+					"usage": "Shield Bash",
+					"reach": "1",
+					"block": "1",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shield"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Buckler"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shield"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Shield"
+							},
+							"modifier": -2
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shield"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Force Shield"
+							},
+							"modifier": -2
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Shield"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Guige"
+							},
+							"modifier": -2
+						}
+					],
+					"calc": {
+						"level": 14,
+						"damage": "1d-2 cr",
+						"block": "11"
+					}
+				}
+			],
+			"features": [
+				{
+					"type": "conditional_modifier",
+					"situation": "to Dodge, Parry & Block against attacks from the front or buckler side",
+					"amount": 1
+				}
+			],
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 50,
+				"extended_value": 50,
+				"weight": "2 lb",
+				"extended_weight": "2 lb"
+			}
+		},
+		{
+			"id": "eq5TLpplO66680bYD",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Basic Set/Basic Set Equipment.eqp",
+				"id": "e6qjxZtOg7lCt_TE5"
+			},
+			"description": "Spear",
+			"reference": "B273",
+			"local_notes": "Long and narrow bronze tip leather-fastened over the top of fire-hardened wood.",
+			"tech_level": "0",
+			"tags": [
+				"Melee Weapon",
+				"Missile Weapon"
+			],
+			"base_value": "40",
+			"base_weight": "2 lb",
+			"weapons": [
+				{
+					"id": "w5stgaDEei5YOrsom",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr",
+						"base": "2"
+					},
+					"strength": "9",
+					"usage": "Thrust",
+					"reach": "1*",
+					"parry": "0",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -5
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Spear"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Polearm"
+							},
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Staff"
+							},
+							"modifier": -2
+						}
+					],
+					"calc": {
+						"level": 14,
+						"damage": "1d imp",
+						"parry": "10"
+					}
+				},
+				{
+					"id": "wo09e4SkVjPpJFFO9",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr",
+						"base": "3"
+					},
+					"strength": "9†",
+					"usage": "Thrust",
+					"reach": "1-2*",
+					"parry": "0",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -5
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Spear"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Polearm"
+							},
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Staff"
+							},
+							"modifier": -2
+						}
+					],
+					"calc": {
+						"level": 14,
+						"damage": "1d+1 imp",
+						"parry": "10"
+					}
+				},
+				{
+					"id": "WtyeImdQHWWESSlwh",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr",
+						"base": "3"
+					},
+					"strength": "9",
+					"usage": "Thrown",
+					"accuracy": "2",
+					"range": "x1/x1.5",
+					"rate_of_fire": "1",
+					"shots": "T",
+					"bulk": "-6",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Thrown Weapon"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Spear"
+							}
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Spear Thrower"
+							},
+							"modifier": -4
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Thrown Weapon"
+							},
+							"specialization": {
+								"compare": "is",
+								"qualifier": "Harpoon"
+							},
+							"modifier": -2
+						}
+					],
+					"calc": {
+						"level": 8,
+						"damage": "1d+1 imp",
+						"range": "10/15"
+					}
+				}
+			],
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 40,
+				"extended_value": 40,
+				"weight": "2 lb",
+				"extended_weight": "2 lb"
+			}
+		},
+		{
+			"id": "e-dS0zhDCB1-L4rBI",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Low Tech/Low Tech Equipment.eqp",
+				"id": "ethb_9uh_gX8DvHU6"
+			},
+			"description": "Reflex Bow",
+			"reference": "LT72",
+			"local_notes": "Traded up the Bosyol from somewhere he could not name. Damage comes off the bow's rated ST and not his: thr+3 at ST 10 is 1d+1, two points more than the bow he carried before, for a quarter-pound. Three turns of Aim from cover, and an unaware man gets no defence at all.",
+			"tech_level": "1",
+			"tags": [
+				"Missile Weapon",
+				"UsesAmmoType:Arrow"
+			],
+			"base_value": "900",
+			"base_weight": "2.25 lb",
+			"weapons": [
+				{
+					"id": "WRiXTtjhqHZUMjC6w",
+					"sv": 1,
+					"damage": {
+						"type": "imp",
+						"st": "thr",
+						"base": "3"
+					},
+					"strength": "10†",
+					"usage": "Shoot",
+					"accuracy": "3",
+					"range": "x20/x25",
+					"rate_of_fire": "1",
+					"shots": "1(2)",
+					"bulk": "-7",
+					"defaults": [
+						{
+							"type": "dx",
+							"modifier": -5
+						},
+						{
+							"type": "skill",
+							"name": {
+								"compare": "is",
+								"qualifier": "Bow"
+							}
+						}
+					],
+					"calc": {
+						"level": 14,
+						"damage": "1d+1 imp",
+						"range": "200/250"
+					}
+				}
+			],
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 900,
+				"extended_value": 900,
+				"weight": "2.25 lb",
+				"extended_weight": "2.25 lb"
+			}
+		},
+		{
+			"id": "eP-4BkxA6rFb7w50l",
+			"source": {
+				"library": "richardwilkes/gcs_master_library",
+				"path": "Low Tech/Low Tech Armor (by material).eqp",
+				"id": "e-p_e3pJtozVU9oDx"
+			},
+			"description": "Cloth, Padded",
+			"reference": "LT103",
+			"local_notes": "DR 1; Flexible, susceptible to blunt trauma; Holdout: -1.\n\nHooded hide over wool that has been wet for a decade. Bog-brown and undyed, the dress of the order rather than armour — it stops exactly one point of anything.",
+			"tech_level": "0",
+			"base_weight": "1",
+			"modifiers": [
+				{
+					"id": "fmA17mGuC3SfyMYnK",
+					"name": "Head",
+					"local_notes": "Don time: 5 secs.",
+					"cost": "+15",
+					"weight": "+1.8 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"skull"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"face"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fbrqvtQJooJb1llPj",
+					"name": "Skull",
+					"local_notes": "Don time: 3 secs.",
+					"cost": "+10",
+					"weight": "+1.2 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"skull"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fape6HDyR_yJljDN5",
+					"name": "Face",
+					"local_notes": "Don time: 2 secs.",
+					"cost": "+5",
+					"weight": "+0.6 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"face"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "f1Frr3IfZkL1LcuBs",
+					"name": "Neck",
+					"local_notes": "Don time: 1 secs.",
+					"cost": "+2.5",
+					"weight": "+0.3 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"neck"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fiRT_QCP1ev8wLO9C",
+					"name": "Torso",
+					"local_notes": "Roll 1d; on 1, the vitals are hit.; Don time: 15 secs.",
+					"cost": "+50",
+					"weight": "+6 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"abdomen"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"groin"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"torso"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"vitals"
+							],
+							"amount": 1
+						}
+					]
+				},
+				{
+					"id": "fspG7wjMXHM21wM52",
+					"name": "Chest",
+					"reference": "LT102",
+					"local_notes": "Hit location 9-10. Roll 1d; on 1, the vitals are hit.; Don time: 12 secs.",
+					"cost": "+37.5",
+					"weight": "+4.5 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"torso"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"vitals"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fbP8KC5Yup6OvRjos",
+					"name": "Abdomen",
+					"reference": "LT102",
+					"local_notes": "Hit location 11. Roll 1d; on 1, the vitals are hit.; Don time: 12 secs.",
+					"cost": "+12.5",
+					"weight": "+1.5 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"abdomen"
+							],
+							"amount": 1
+						},
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"groin"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fc5TzsnnBb0M-c-QG",
+					"name": "Groin",
+					"local_notes": "Don time: 1 secs.",
+					"cost": "+2.5",
+					"weight": "+0.3 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"groin"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fi_YKBmW4FuwztiUt",
+					"name": "Arms",
+					"local_notes": "Don time: 8 secs.",
+					"cost": "+25",
+					"weight": "+3 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"arm"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "f2_fXbD2C1xkQMheo",
+					"name": "Shoulders",
+					"local_notes": "Roll 1d; on 6, the armor is hit.; Don time: 2 secs.",
+					"cost": "+5",
+					"weight": "+0.6 lb",
+					"disabled": true
+				},
+				{
+					"id": "foEzefERrBwhVHio-",
+					"name": "Upper Arms",
+					"local_notes": "Roll 1d; on 5, the armor is hit.; Don time: 2 secs.",
+					"cost": "+5",
+					"weight": "+0.6 lb",
+					"disabled": true
+				},
+				{
+					"id": "f1hBg2Ls1XBrxD-UK",
+					"name": "Elbows",
+					"local_notes": "Roll 1d; on 4, the armor is hit.; Don time: 1 secs.",
+					"cost": "+2.5",
+					"weight": "+0.3 lb",
+					"disabled": true
+				},
+				{
+					"id": "fPivBYSUwQiFvvMMX",
+					"name": "Forearms",
+					"local_notes": "Roll 1d; on 1-3, the armor is hit.; Don time: 4 secs.",
+					"cost": "+12.5",
+					"weight": "+1.5 lb",
+					"disabled": true
+				},
+				{
+					"id": "fxpTKUiujFGz_rs9_",
+					"name": "Hands",
+					"local_notes": "Don time: 2 secs.",
+					"cost": "+5",
+					"weight": "+0.6 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"hand"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fRCjwwoSfDrAUw_gq",
+					"name": "Legs",
+					"local_notes": "Don time: 15 secs.",
+					"cost": "+50",
+					"weight": "+6 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"leg"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "fPjECTQRIYVsb0QCf",
+					"name": "Thighs",
+					"local_notes": "Roll 1d; on 5-6, the armor is hit.; Don time: 7 secs.",
+					"cost": "+22.5",
+					"weight": "+2.7 lb",
+					"disabled": true
+				},
+				{
+					"id": "f0fU1HkRRLPZoGxwi",
+					"name": "Knees",
+					"local_notes": "Roll 1d; on 4, the armor is hit.; Don time: 1 secs.",
+					"cost": "+2.5",
+					"weight": "+0.3 lb",
+					"disabled": true
+				},
+				{
+					"id": "fnROyaI-VJmZI1RUe",
+					"name": "Shins",
+					"local_notes": "Roll 1d; on 1-3, the armor is hit.; Don time: 8 secs.",
+					"cost": "+25",
+					"weight": "+3 lb",
+					"disabled": true
+				},
+				{
+					"id": "fkWdhHok1g3Lxw5En",
+					"name": "Feet",
+					"local_notes": "Don time: 2 secs.",
+					"cost": "+5",
+					"weight": "+0.6 lb",
+					"features": [
+						{
+							"type": "dr_bonus",
+							"locations": [
+								"foot"
+							],
+							"amount": 1
+						}
+					],
+					"disabled": true
+				},
+				{
+					"id": "f6hTy_a_f7cZQGJUx",
+					"name": "@Covers only half (front only, one arm, etc)@",
+					"reference": "LT100",
+					"cost_type": "to_base_cost",
+					"weight_type": "to_base_weight",
+					"cost": "x0.5",
+					"weight": "x0.5",
+					"disabled": true
+				}
+			],
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 50,
+				"extended_value": 50,
+				"weight": "8 lb",
+				"extended_weight": "8 lb"
+			}
+		}
+	],
+	"other_equipment": [
+		{
+			"id": "Ekb27Az5KUlErsNLy",
+			"description": "Oequipment Container",
+			"legality_class": "4",
+			"quantity": 1,
+			"equipped": true,
+			"children": [
+				{
+					"id": "eg3N2rlmOKk5_0XoM",
+					"description": "Antler comb",
+					"local_notes": "Used to comb out lice, and to dress his hair before walking into a camp that is not his.\n\nSix teeth, two of them replacements.\n\nA priest who arrives with his hair in ropes is a bog savage carrying a spear, and the office is worth more than his comfort. He combs at the tree line, before he is seen, not after.",
+					"legality_class": "4",
+					"base_weight": "0.05 lb",
+					"quantity": 1,
+					"equipped": true,
+					"calc": {
+						"value": 0,
+						"extended_value": 0,
+						"weight": "0.05 lb",
+						"extended_weight": "0.05 lb"
+					}
+				},
+				{
+					"id": "eirlAZQ6Sr_rn1z1j",
+					"description": "The heavy roll",
+					"local_notes": "Used for surgery that needs a fire, a table and an hour: amputation, deep extraction, setting bone, sealing a bleed the linen will not stop. Too heavy and too slow for anything that happens on the track.\n\nA bronze cautery rod, a small bow-saw for bone, split-cane splints, boiled linen by the yard, and a bronze bowl for catching what comes out.\n\nThe kesqap (cutting-vessel) on his hip is for what happens on the road. This is for what happens afterwards.\n\nThe cautery is in it and he dislikes that it is. A searing iron closes, and closing is the direction the world is not meant to travel. He has used it four times and named it aloud each time, which is not a rite anyone taught him either.",
+					"legality_class": "4",
+					"base_weight": "8 lb",
+					"quantity": 1,
+					"equipped": true,
+					"calc": {
+						"value": 0,
+						"extended_value": 0,
+						"weight": "8 lb",
+						"extended_weight": "8 lb"
+					}
+				}
+			],
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "0 lb",
+				"extended_weight": "8.05 lb"
+			}
+		},
+		{
+			"id": "esXbdQMVTukOfBaWa",
+			"description": "The stores",
+			"local_notes": "Used to refill the day-kit and the ration pouch. Bulk honey, wine, fat, salt and cakes against the remainder of the road — roughly forty days at current rate.\n\nHoney in a sealed crock, a skin of sour wine, bog butter lifted out of the peat where it was buried a year ago and gone tangy, salt, and a sack of ashtash (food-stone).\n\nWhat is on him is the day. This is the forty days.\n\nIt is not his. A priest cannot own or bequeath, and everything reverts to the grove, so drawing on it is an ulush (share / standing / worth) question — settled publicly, at the fire, and not by him.",
+			"legality_class": "4",
+			"base_weight": "30 lb",
+			"quantity": 1,
+			"equipped": true,
+			"calc": {
+				"value": 0,
+				"extended_value": 0,
+				"weight": "30 lb",
+				"extended_weight": "30 lb"
+			}
+		}
+	],
+	"notes": [
+		{
+			"id": "n1sRyf8TbFfiovjAo",
+			"markdown": "**TRANCE — the technologies of the sacred**\n\nHow the Menkhu (line-knower) puts a mind under, and what comes back. Costs no points: every roll below is a skill he already owns.",
+			"reference": "LTC1:16"
+		}
+	],
+	"created_date": "2026-08-14T14:10:32-03:00",
+	"modified_date": "2026-08-27T14:10:00-03:00",
+	"calc": {
+		"swing": "1d",
+		"thrust": "1d-2",
+		"basic_lift": "20 lb",
+		"move": [
+			6,
+			4,
+			3,
+			2,
+			1
+		],
+		"dodge": [
+			9,
+			8,
+			7,
+			6,
+			5
+		]
+	}
+}

@@ -58,13 +58,37 @@ class Row:
     """Equipment only: ``True`` for the carried list, ``False`` for other."""
 
     @property
-    def name(self) -> str:
-        """The row's display name, preferring the un-decorated form.
+    def gcs_name(self) -> str:
+        """The name as GCS had it, from ``originalName``.
 
-        ``originalName`` is what GCS had; ``name`` has levels appended for
-        traits and the resolved base skill appended for techniques.
+        This is the stable anchor.  GGA writes it once at import and does not
+        update it when the player renames the row in Foundry, which is what
+        makes it usable for matching.  Note that it is not always the *raw* GCS
+        name: for skills it already includes the specialization and ``/TL``
+        (``"Esoteric Medicine (Menkhu)"``), and for techniques it carries GGA's
+        resolved-and-mangled suffix (docs/05-fidelity.md 5.2).
         """
         return self.data.get("originalName") or self.data.get("name") or ""
+
+    @property
+    def display_name(self) -> str:
+        """The name Foundry currently shows, from ``name``.
+
+        Differs from :attr:`gcs_name` in two very different ways, and telling
+        them apart is the reconciler's job:
+
+        * **Decoration** GGA added at import — a trait's level appended
+          (``"Good Reputation 3"``), a technique's base skill appended.
+        * **A rename by the player**, which is a real edit to carry back.
+          Verified against samples/container: renaming an item in Foundry
+          changes ``name`` and leaves ``originalName`` alone.
+        """
+        return self.data.get("name") or self.data.get("originalName") or ""
+
+    #: Reporting alias for :attr:`display_name` — what a human would call the row.
+    @property
+    def name(self) -> str:
+        return self.display_name
 
     @property
     def added_in_foundry(self) -> bool:

@@ -39,6 +39,20 @@ fixture for the whole project.
 | `sturm.gcs` | GCS v5 sheet, saved by GCS |
 | `sturm.foundry.json` | Foundry "Export Data" dump of the same actor |
 
+`samples/container/` is a purpose-built pair capturing containers and a known
+set of in-play edits. Captured 2026-08-27 against GGA `0.18.13` / Foundry
+`13.351`, with GGA's "Use Foundry Items for Equipment" setting **off**.
+
+| File | What it is |
+|---|---|
+| `container.gcs` | Stürm plus four containers — trait, skill, carried equipment (two levels deep) and other equipment |
+| `container.foundry.json` | exported immediately after import, nothing touched — the control |
+| `container-played.foundry.json` | exported again after: deleted the *Poisons* skill, arrows 10 → 4, un-equipped the Backpack and *Yarqap*, renamed *The Book of Lines*, edited a note, took HP 10 → 6 and FP 11 → 3 |
+
+The control export is what makes this set valuable: with no play in between,
+every difference from `container.gcs` is GGA's transform and nothing else. See
+`docs/05-fidelity.md` §5.7 for what it turned up.
+
 `samples/upstream/` holds two fixtures copied out of the `gcs` clone, used to
 test the reader/writer against GCS output we did not produce:
 

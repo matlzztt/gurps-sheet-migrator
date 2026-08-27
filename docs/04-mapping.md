@@ -118,7 +118,7 @@ container) and `system.traits.options` (empty).
 | GCS | Foundry | Fidelity |
 |---|---|---|
 | `id` | `uuid` | ✅ — the anchor for the whole merge |
-| `name` | `originalName` | ✅ — **not** `name`; `name` has the level appended (`"Good Reputation 3"`) |
+| `name` | `originalName` | ✅ — **not** `name`; `name` has the level appended (`"Good Reputation 3"`). But see §4.9: a player *rename* also lands in `name`, so the two fields are not interchangeable |
 | `levels` | `level` | ✅ |
 | `reference` | `pageref` | ✅ |
 | `local_notes` | `notes` | 🔶 — see below |
@@ -168,6 +168,7 @@ template and desynchronizes `replacements{}`.
 | `difficulty` | `relativelevel` | 🔶 — `relativelevel` is `calc.rsl` (`"IQ+1"`), which gives the controlling attribute but not the difficulty letter |
 | `defaults[]`, `default`, `limit`, `prereqs`, `features[]`, `tags[]`, `source`, `defaulted_from`, `encumbrance_penalty_multiplier` | — | ❌ |
 | — | `import` | 🗑️ (that is `calc.level`) |
+| — | `level` | 🗑️ — empty right after import, filled in by GGA later. Verified derived in `docs/05-fidelity.md` §5.7 |
 
 Verified on the sample: every `points` value matches exactly across all 21 shared
 skills, and every composed name decomposes cleanly —
@@ -282,7 +283,38 @@ is the expected shape of the discrepancy, and a good merge-mode assertion: after
 merging, GCS's recomputed spend should equal `system.totalpoints` minus `unspent`.
 
 `system.totalpoints.{attributes, ads, disads, quirks, skills, spells, unspent, race}`
-are all 🗑️ — GCS recomputes them.
+are all 🗑️ — GCS recomputes them. So are `equippedparry` and `equippedblock`,
+which are `null` until GGA computes them (`docs/05-fidelity.md` §5.7).
+
+## 4.9 Renames, and telling them from decoration
+
+`originalName` is written once at import and never updated; `name` carries both
+GGA's decoration *and* any rename the player makes. Confirmed against
+`samples/container/`: renaming an item changed `name` alone.
+
+So for any row, `name` differing from `originalName` means one of two things:
+
+| Pattern | Meaning | Action |
+|---|---|---|
+| `name == originalName + " " + str(levels)` | trait level decoration | ignore |
+| `name == originalName + " (" + base_skill + ")"` (or `([object Object])`) | technique decoration | ignore |
+| anything else | **a real rename** | carry back to `name` / `description` |
+
+Match the decoration patterns explicitly and treat everything else as a rename;
+the reverse — trying to enumerate rename shapes — cannot work.
+
+Equipment has no decoration at all, so there `name != originalName` is always a
+rename.
+
+## 4.10 `equipped` cascades
+
+Un-equipping a container in Foundry clears `equipped` on every descendant
+(`docs/05-fidelity.md` §5.7): one action, four changed rows in the export.
+
+Writing each row's `equipped` back independently is *correct* — GCS stores the
+flag per row too — but the change **report** should collapse a cascade into the
+action that caused it, or a player who un-equipped one backpack will be shown
+four unexplained edits and lose confidence in the diff.
 
 ## 4.8 Everything Foundry adds that GCS has no home for
 

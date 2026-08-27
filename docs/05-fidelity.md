@@ -143,42 +143,24 @@ Structured `damage` (`{type, st, base}` → `"1d+1 imp"`), `range` formula
 
 Things the fixture cannot validate, ranked by how likely they are to bite:
 
-1. **Containers.** The sample has **none** — re-verified exhaustively:
+1. ~~**Containers.**~~ **Resolved** by `samples/container/` — see §5.7. The
+   `sturm` fixture is flat, but a purpose-built pair now covers containers up to
+   two levels deep in traits, skills, carried equipment and other equipment.
 
-   - No GCS row in any section carries a `children` key.
-   - Every top-level GCS TID is lowercase: `t`×22, `s`×22, `q`×2, `e`×26, `n`×1.
-     No `T`, `E`, `S`, or `N`.
-   - Every Foundry row has `contains: {}` and `parentuuid: ""`.
-
-   The single container anywhere in the file is a *trait modifier* container —
-   `Frequency` on `Duty (@Duty@)`, TID `Mj0nfAjCFkqJZhzsS`, with four children.
-   Modifiers do not survive into Foundry at all, so it is irrelevant to the round
-   trip.
-
-   **Note on a likely point of confusion:** GCS's two equipment tables, *Carried
-   Equipment* (23 rows) and *Other Equipment* (3 rows: `Antler comb`,
-   `The heavy roll`, `The stores`), are **two sibling top-level lists**
-   (`equipment` and `other_equipment`), not a container relationship. They map to
-   Foundry's `system.equipment.carried` / `.other`. Grouping equipment as
-   "used vs. unused" this way involves no container and no nesting.
-
-   So trait containers, equipment containers, skill containers, and the
-   `parentuuid` ↔ `contains` double-bookkeeping remain **entirely untested**.
-   Container TIDs are uppercase and GGA derives row type from that prefix, so
-   getting this wrong produces silently mistyped rows. **A fixture with real
-   nesting is still needed** — in GCS that means a row created via
-   *Edit → New Trait Container* / *New Equipment Container* with rows dragged
-   inside it, which renders as an expand/collapse triangle in the sheet.
 2. **Spells.** `system.spells` is `{}` and `spells` is absent from the GCS file.
    The mapping is assumed to parallel skills; it is unverified.
 3. **Foundry-items mode.** `SETTING_USE_FOUNDRY_ITEMS` moves data into real
    `Item` documents; `items: []` here. Detect it and refuse rather than drop data.
-4. **Rows added inside Foundry.** Marked `save: true`, no GCS counterpart, need
-   freshly minted TIDs. None in the sample.
-5. **Rows deleted inside Foundry.** Present in the base GCS, absent from the
-   export. Indistinguishable from "added to GCS after the export" — the sample's
-   three GCS-only skills are exactly that. **This is genuinely ambiguous and needs
-   a user decision, not a default.**
+4. **Rows added inside Foundry.** Still uncovered — the one attempt to add a
+   skill and an item through the sheet did not take. `addItemMenu` in
+   `gurps/module/actor/actor-sheet.js` mints an id via `_getGGAId()`, which is
+   **not** a GCS TID, and only sets `save: true` in Foundry-items mode. So the
+   reader must treat "no valid TID" as the primary signal, which it does — but
+   the shape of a real GGA-minted id is still unverified.
+5. **Rows deleted inside Foundry.** **Resolved** — see §5.7. The row simply
+   disappears and the collection renumbers. It remains *indistinguishable* from
+   "added to GCS after the export" when comparing a single export against a
+   sheet, so the ambiguity is a reconciler policy question, not a data one.
 6. **Non-humanoid body plans**, alternate `damage_progression`, metric units.
 7. **Version skew.** The sample was exported by GGA `0.18.13`; the pinned clone is
    `0.18.22`. GGA's actor schema does move between minor versions.
@@ -186,3 +168,75 @@ Things the fixture cannot validate, ranked by how likely they are to bite:
    entry in the sample's GCS `settings.attributes`. Writing `qn`/`qp` attributes
    into a sheet whose settings do not define them will produce rows GCS ignores or
    flags.
+
+## 5.7 The container fixture, and what it exposed
+
+`samples/container/` is a controlled experiment rather than a found artifact:
+
+| File | What it is |
+|---|---|
+| `container.gcs` | Stürm with four containers added — trait, skill, carried equipment (nested two deep: Backpack → Metabackpack → The Book of Lines) and other equipment |
+| `container.foundry.json` | exported **immediately after import**, nothing touched |
+| `container-played.foundry.json` | exported again after a known list of edits |
+
+The control export is the valuable half: with no play in between, every
+difference from the GCS file is GGA's transform and nothing else. The played
+export supplies a ground-truth changelog for the reconciler.
+
+### Containers round-trip cleanly
+
+Verified in `tests/test_containers.py`:
+
+- Uppercase TIDs survive: `T_7dZkq1Ziwxfz--o`, `Sjj3Skr06jC0nmHcX`,
+  `Et0bRTzaIEVIXAlQi`, `EeBidMeu7scIX-zhc`, `Ekb27Az5KUlErsNLy`.
+- `contains` and `parentuuid` agree with each other and with the sheet — the
+  full set of parent/child edges is identical on both sides.
+- Depth is preserved; a three-level chain arrives intact.
+- `carried` propagates: everything inside a carried container is carried, and
+  everything inside the Other Equipment container is not.
+
+So the reader needed no changes, and the synthetic tests written from
+`foldList()` turn out to have modelled it correctly.
+
+### Three things the fixture caught that source reading had not
+
+**1. A rename lands in `name` only.** Renaming *The Book of Lines* to *The Book
+of Metabackpacking* in Foundry changed `name` and left `originalName` at the GCS
+value. That makes `originalName` a genuinely stable anchor — and it also means a
+"display name" accessor that prefers `originalName` will silently miss real
+renames. `Row.gcs_name` and `Row.display_name` are now separate for this reason.
+
+**2. `equipped` cascades through containers.** Un-equipping the Backpack cleared
+`equipped` on the Metabackpack, the Book inside it, and the Horn-tip — four rows
+from one action. A naive per-row diff reports four independent edits. The
+reconciler should recognise a cascade and carry back the intent, not the
+fan-out.
+
+**3. Note indentation compounds on every save cycle.** `Green Sight`'s note,
+which the player never touched:
+
+| | max leading whitespace |
+|---|---|
+| `container.gcs` | 0 |
+| after import | 8 |
+| after one save | 44 |
+
+The text is identical once runs of spaces are collapsed. Writing Foundry's
+`notes` verbatim into `local_notes` would import this and make it worse every
+round trip — the compounding-corruption failure mode predicted in
+`docs/06-architecture.md` §6.5, arriving by a different mechanism than expected.
+**Notes must be compared whitespace-insensitively and must never be copied
+verbatim.**
+
+### Two more fields confirmed as derived (🗑️)
+
+- **`skills[].level`** is `""` right after import and an integer afterwards, for
+  every skill the player never touched. It is a lazily populated display value,
+  not an input. (`points` — a real GCS input — did not move.) Only the skill
+  *container*, which has no level, stayed empty.
+- **`equippedparry` / `equippedblock`** are `null` after import and computed
+  later (`10` and `11`).
+
+Anything that materialises between two exports with no player action in between
+is by definition derived. That is a reusable test, and worth re-running against
+any future fixture pair.
