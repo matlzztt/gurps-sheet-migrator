@@ -1,16 +1,19 @@
 """Command line entry point.
 
 ``inspect`` summarises an export and how it lines up with a base sheet.
-``diff`` reconciles the two and reports what a session changed.  Neither writes
-anything; ``convert`` arrives with the writer.
+``diff`` reconciles the two and reports what a session changed, writing nothing.
+``convert`` does the same and writes the merged sheet.
 """
 
 from __future__ import annotations
 
 import argparse
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
+from . import apply as applymod
 from . import foundry, gcs, jsonio, reconcile, report, tid
 from . import __version__
 
@@ -148,6 +151,88 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
+def _verify_with_gcs(path: Path) -> tuple[bool, str]:
+    """Load the output with GCS itself, if it is installed.
+
+    ``gcs --convert`` reads a file, rewrites it in the current data format and
+    exits, which makes the real application a headless validator
+    (docs/06-architecture.md 6.5).
+    """
+    binary = shutil.which("gcs")
+    if not binary:
+        return False, "gcs not on PATH; skipped"
+    try:
+        done = subprocess.run(
+            [binary, "--convert", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError) as err:
+        return False, f"could not run gcs: {err}"
+    if done.returncode != 0:
+        return False, (done.stderr or done.stdout or "non-zero exit").strip()
+    return True, "GCS loaded and rewrote the file without complaint"
+
+
+def cmd_convert(args: argparse.Namespace) -> int:
+    export = Path(args.export)
+    actor = foundry.load(export)
+    base = _resolve_base(args, actor, export)
+    sheet = gcs.load(base)
+
+    if args.output:
+        out = Path(args.output)
+    else:
+        out = base.with_suffix(".merged.gcs")
+    if out.resolve() == base.resolve() and not args.force:
+        raise ValueError(
+            f"refusing to overwrite the base sheet {base}; "
+            "choose a different -o, or pass --force"
+        )
+
+    result = reconcile.reconcile(actor, sheet)
+    print(report.render(result))
+    print()
+
+    if args.dry_run:
+        outcome = applymod.plan(
+            result, deletions=args.deletions, include_lossy=args.include_lossy
+        )
+        print(
+            f"Dry run: would write {len(outcome.applied)} field change(s), "
+            f"{len(outcome.added)} new row(s), drop {len(outcome.dropped)}, "
+            f"keep {len(outcome.kept)}."
+        )
+        print(f"Nothing written. Output would be {out}")
+        return 0
+
+    outcome = applymod.apply(
+        result, sheet, deletions=args.deletions, include_lossy=args.include_lossy
+    )
+    if not outcome.total:
+        print("Nothing to carry back; the sheet already matches the export.")
+        return 0
+
+    jsonio.dump(out, sheet.data)
+    print(
+        f"Wrote {out}  "
+        f"({len(outcome.applied)} field change(s), {len(outcome.added)} new row(s), "
+        f"{len(outcome.dropped)} dropped, {len(outcome.kept)} kept)"
+    )
+    for note in outcome.notes:
+        print(f"  · {note}")
+    if outcome.skipped:
+        print(f"  · {len(outcome.skipped)} change(s) left for review — see above")
+
+    if args.verify:
+        ok, detail = _verify_with_gcs(out)
+        print(f"  · verify: {detail}")
+        if not ok and shutil.which("gcs"):
+            return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="json2gcs",
@@ -180,6 +265,48 @@ def build_parser() -> argparse.ArgumentParser:
         "-v", "--verbose", action="store_true", help="also list unchanged rows"
     )
     diff.set_defaults(func=cmd_diff)
+
+    convert = sub.add_parser(
+        "convert",
+        help="merge an export into a base sheet and write the result",
+    )
+    convert.add_argument("export", help="the Foundry actor export (.json)")
+    convert.add_argument(
+        "--base",
+        help="the original .gcs sheet (auto-detected from the export if omitted)",
+    )
+    convert.add_argument(
+        "-o",
+        "--output",
+        help="where to write (default: alongside the base, as <name>.merged.gcs)",
+    )
+    convert.add_argument(
+        "--deletions",
+        choices=applymod.DeletionPolicy.ALL,
+        default=applymod.DeletionPolicy.KEEP,
+        help=(
+            "rows in the sheet but not the export: 'keep' (default) leaves them, "
+            "'drop' removes them. They are ambiguous — either deleted in Foundry "
+            "or added to the sheet after the export"
+        ),
+    )
+    convert.add_argument(
+        "--include-lossy",
+        action="store_true",
+        help="also write changes flagged lossy (notes, values GCS derives)",
+    )
+    convert.add_argument(
+        "--dry-run", action="store_true", help="report only; write nothing"
+    )
+    convert.add_argument(
+        "--force", action="store_true", help="allow overwriting the base sheet"
+    )
+    convert.add_argument(
+        "--verify",
+        action="store_true",
+        help="after writing, load the result with 'gcs --convert' if available",
+    )
+    convert.set_defaults(func=cmd_convert)
     return parser
 
 

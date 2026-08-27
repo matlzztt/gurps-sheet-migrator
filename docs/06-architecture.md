@@ -211,11 +211,37 @@ the user swap.
    The acceptance test is the control export: taken with nothing touched, it
    must yield **zero** applicable changes. Getting there took four corrections,
    each a real thing GGA does to the data (see `docs/05-fidelity.md` §5.8).
-4. Field policy table, starting with the ✅ rows only.
-5. ⚙️ rows (attributes via the points route, SM, tags, dates).
-6. 🔶 rows, each behind its own guard and each with a golden-test case.
-7. `calc` emission, then Foundry re-import as an end-to-end check.
-8. Packaging.
+4. ~~Field policy table, starting with the ✅ rows only.~~ **Done** — `fields.py`.
+5. ~~⚙️ rows (attributes via the points route, SM, dates).~~ **Done** —
+   attributes invert through `points / cost_per_point` as designed. (`tags`
+   turned out to be ❌, not ⚙️ — see `docs/04-mapping.md` §4.5.)
+6. ~~🔶 rows, each behind its own guard.~~ **Done** — reported, never written
+   unless `--include-lossy`, and blocked outright where the value is known to
+   be contaminated.
+7. ~~Writer.~~ **Done** — `apply.py` and `json2gcs convert`. Edits the base
+   structure in place so everything Foundry never knew about survives by
+   construction rather than by being copied correctly.
+8. `calc` refresh, then Foundry re-import as an end-to-end check.
+9. Packaging.
+
+### What the writer had to get right
+
+**Setting a field to its zero value means deleting the key.** Almost every Go
+tag is `omitzero`, so GCS never writes `equipped: false` — it omits the field.
+Un-equipping is a deletion, not an assignment. `equipment.quantity` is the one
+row field without `omitzero`, so a zero quantity really is written.
+
+**New keys need canonical placement.** GCS writes in Go struct declaration
+order, so `schema.py` carries the order transcribed from the struct definitions,
+with embedded structs flattened at the position of the embedded field.
+`tests/test_schema.py` checks the transcription against every row of every
+fixture — 154 rows agree, which is what makes it trustworthy rather than
+plausible.
+
+**Idempotence is a test, not an aspiration.** Converting, re-reading and
+converting again must be a no-op. That is what would catch the compounding
+failures — modifier names accumulating in notes, indentation growing — and it
+is locked in `tests/test_apply.py`.
 
 Steps 1–3 are worth having before any mapping work, because a correct
 byte-identical writer plus an honest report is already a usable tool: it tells the
