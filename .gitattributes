@@ -1,0 +1,7 @@
+# GCS writes LF-only, tab-indented UTF-8 and its serialization contract depends on
+# it (docs/02-gcs-format.md 2.1). Never let autocrlf rewrite these fixtures.
+*.gcs        text eol=lf
+*.json       text eol=lf
+*.md         text eol=lf
+.gitignore   text eol=lf
+.gitattributes text eol=lf

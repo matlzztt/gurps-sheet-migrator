@@ -1,0 +1,23 @@
+# --- Vendored upstream clones (reference only; pinned in docs/00-provenance.md) ---
+/gcs/
+/gurps/
+
+# --- Build / tooling output ---
+/dist/
+/build/
+*.spec
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Scratch ---
+/scratch/
+*.tmp
