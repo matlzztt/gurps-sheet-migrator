@@ -5,32 +5,46 @@ Converts a GURPS character exported from **Foundry VTT** (via the
 (`.gcs`) character sheet — closing a loop that currently only runs one way.
 
 **Status: Phase 2 in progress.** Phase 1 (analysis, see `docs/`) is complete.
-Built so far: the Foundry export reader, TID handling, a byte-exact GCS
-reader/writer, and a read-only `inspect` command. The converter itself is next.
+Built so far: both format readers, a byte-exact GCS writer, and the reconciler —
+`diff` reports what a play session changed. Writing the merged sheet is next.
 
 ```bash
 python -m pip install -e ".[dev]"
 ```
 
 ```bash
-json2gcs inspect samples/sturm/sturm.foundry.json --base samples/sturm/sturm.gcs
+json2gcs diff samples/container/container-played.foundry.json --base samples/container/container.gcs
 ```
 
 ```
-  section              rows  containers  added in Foundry
-  traits                 22           0                 0
-  skills                 21           0                 0
-  equipment (carried)    23           0                 0
-  ...
-  matched by TID    : 70
-  only in Foundry   : 0
-  only in base sheet: 3
-      s0mjErCL7ThyKHrVv  Jumping   (skill)
-      s1SJd36jSlBbtL4FT  Tracking   (skill)
-      sn5XDmL2OJTim_8JB  Climbing   (skill)
-    ^ ambiguous: either deleted in Foundry or added to GCS after
-      the export. See docs/06-architecture.md 6.3.
+Changes to carry back
+  equipment (carried)
+      Arrow
+        quantity     10 → 4
+      Backpack
+        equipped     yes → no
+    └ Metabackpack
+        equipped     yes → no   (follows its container)
+    └ The Book of Lines
+        name         "The Book of Lines" → "The Book of Metabackpacking"
+        equipped     yes → no   (follows its container)
+  character
+        HP damage    0 → 4
+        FP damage    0 → 8
+
+In the sheet but not the export (1) — ambiguous
+    skills: Poisons
+    Either deleted in Foundry or added to the sheet after the export.
+    Nothing in either file tells them apart, so these are kept.
+
+Needs review (4) — found, but not safe to apply
+    Cloth, Padded
+        weight       "1" → "8"
+            row has modifiers, so Foundry's value is post-modifier
 ```
+
+`inspect` gives a plainer summary of one export. Neither command writes
+anything.
 
 ## The short version
 
@@ -72,8 +86,12 @@ src/json2gcs/
   jsonio.py              byte-exact GCS JSON reader/writer
   tid.py                 GCS TID validation, kind prefixes, minting
   foundry.py             Foundry actor export reader, flat-indexed by TID
+  gcs.py                 TID-indexed view of a GCS sheet
+  fields.py              the field policy, as data (docs/04-mapping.md)
+  reconcile.py           matches by TID and diffs under that policy
+  report.py              renders a reconciliation as readable text
   cli.py                 command line entry point
-tests/                   pytest suite (118 tests)
+tests/                   pytest suite (143 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
 samples/container/       container + known-changelog fixture set
@@ -103,6 +121,9 @@ commands there if you need them.
   exit headlessly. Diffing our output against its rewrite makes GCS's own
   serializer the test oracle.
 - **The lossy fields are enumerable**, not a vague fog — see `docs/05-fidelity.md`.
+- **A control export is a sharp acceptance test.** Exported with nothing touched,
+  it must reconcile to *zero* applicable changes. The first run reported 32 —
+  every one a real defect in the field policy. See `docs/05-fidelity.md` §5.8.
 - **Containers round-trip cleanly.** `samples/container/` covers nesting two
   levels deep across traits, skills and both equipment lists; uppercase TIDs,
   `contains` and `parentuuid` all survive intact.

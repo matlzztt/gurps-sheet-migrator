@@ -1,8 +1,8 @@
 """Command line entry point.
 
-Only ``inspect`` exists so far: it reads a Foundry export (and optionally the
-base GCS sheet), reports what it found, and lists anything that would make a
-conversion unsafe.  ``convert`` arrives with the reconciler.
+``inspect`` summarises an export and how it lines up with a base sheet.
+``diff`` reconciles the two and reports what a session changed.  Neither writes
+anything; ``convert`` arrives with the writer.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import foundry, jsonio, tid
+from . import foundry, gcs, jsonio, reconcile, report, tid
 from . import __version__
 
 
@@ -43,6 +43,35 @@ def _gcs_rows(sheet: dict) -> dict[str, dict]:
     for section in ("traits", "skills", "spells", "equipment", "other_equipment", "notes"):
         walk(sheet.get(section))
     return index
+
+
+def _resolve_base(args: argparse.Namespace, actor: foundry.Actor, export: Path) -> Path:
+    """Find the base sheet, or explain why we cannot."""
+    if args.base:
+        return Path(args.base)
+    found = _find_base(actor, export)
+    if found:
+        return found
+    hint = (
+        f" — looked for {actor.import_name!r} beside the export"
+        if actor.import_name
+        else ""
+    )
+    raise ValueError(f"no base .gcs sheet given and none found{hint}; pass --base")
+
+
+def cmd_diff(args: argparse.Namespace) -> int:
+    export = Path(args.export)
+    actor = foundry.load(export)
+    base = _resolve_base(args, actor, export)
+    sheet = gcs.load(base)
+
+    print(f"Foundry export : {export}   ({actor.name}, GGA {actor.system_version})")
+    print(f"Base GCS sheet : {base}")
+    print()
+    result = reconcile.reconcile(actor, sheet)
+    print(report.render(result, verbose=args.verbose))
+    return 1 if result.warnings else 0
 
 
 def cmd_inspect(args: argparse.Namespace) -> int:
@@ -137,6 +166,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="the original .gcs sheet (auto-detected from the export if omitted)",
     )
     inspect.set_defaults(func=cmd_inspect)
+
+    diff = sub.add_parser(
+        "diff",
+        help="reconcile an export against a base sheet and report what changed",
+    )
+    diff.add_argument("export", help="the Foundry actor export (.json)")
+    diff.add_argument(
+        "--base",
+        help="the original .gcs sheet (auto-detected from the export if omitted)",
+    )
+    diff.add_argument(
+        "-v", "--verbose", action="store_true", help="also list unchanged rows"
+    )
+    diff.set_defaults(func=cmd_diff)
     return parser
 
 

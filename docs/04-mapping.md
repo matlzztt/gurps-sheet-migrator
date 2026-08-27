@@ -200,11 +200,11 @@ stripped, and the `@nameable@` template can only be restored from the base file.
 | `reference` | `pageref` | ✅ |
 | `tech_level` | `techlevel` | ✅ |
 | `legality_class` | `legalityclass` | ✅ |
-| `tags[]` | `categories` (comma-joined) | ⚙️ — `categories.split(', ')` |
+| `tags[]` | — | ❌ **correction.** `importEq` reads `i.categories`, but GCS v5 writes the field as `tags`, so `categories` is always `''`. Verified: every equipment row in `samples/container/` has an empty `categories`. Equipment tags do not survive |
 | `uses` / `max_uses` | `uses` / `maxuses` | ✅ |
 | `children[]` | `contains{}` | ✅ |
 | `base_value` | `cost` | 🔶 — `importEq` computes `cost = calc.extended_value / quantity`, i.e. **after** modifiers. Round-tripping it bakes the modifier in permanently |
-| `base_weight` | `weight` | 🔶 — same, from `calc.extended_weight`; also loses the unit suffix (`"2.25 lb"` → `"2.25"`) |
+| `base_weight` | `weight` | 🔶 — same, from `calc.extended_weight`; also loses the unit suffix (`"2.25 lb"` → `"2.25"`). See §4.11 |
 | `local_notes` | `notes` | 🔶 — modifier names concatenated, same as traits |
 | `modifiers[]`, `features[]`, `prereqs`, `rated_strength`, `source` | — | ❌ |
 
@@ -326,3 +326,27 @@ matter, or drop them.
 `.drMod`, `.drCap` (manual DR overrides) · `addToQuickRoll` · `modifierTags` ·
 `consumeAction` · `extraAttacks` · On-the-Fly formulas embedded in note fields ·
 `effects[]` (Foundry active effects) · `system.melee[].baseParryPenalty`.
+
+## 4.11 Unitless quantities are unit-ambiguous
+
+GCS lets `base_value` and `base_weight` omit the unit, in which case it reads
+them in the sheet's `settings.default_weight_units`. Foundry stores the value
+GCS *rendered*, which is in whatever unit `calc` used.
+
+On the container fixture, whose sheet is metric:
+
+| | |
+|---|---|
+| GCS `base_weight` | `"0.1"` — read as 0.1 kg |
+| `calc.weight` | `"0.2 lb"` |
+| Foundry `weight` | `"0.2"` |
+
+Nothing changed, but a naive magnitude comparison reports `0.1 → 0.2`. Where the
+base value carries an explicit unit both sides agree and the comparison is
+sound, so the rule is narrow: **when the base value is unitless and the sheet's
+default weight unit is not `lb`, the two numbers are not comparable.** Treat it
+as unverifiable rather than as a change.
+
+Doing this properly means real unit conversion, which needs a fixture with a
+metric sheet whose values were actually edited in play. Until then, blocking is
+the honest answer.

@@ -91,6 +91,20 @@ class Row:
         return self.display_name
 
     @property
+    def gcs_section(self) -> str:
+        """The GCS top-level key this row belongs in.
+
+        Foundry calls traits ``ads`` and splits equipment by a ``carried`` flag;
+        GCS calls them ``traits`` and splits them into two separate lists.
+        Normalizing to GCS's names gives both sides one vocabulary to match on.
+        """
+        if self.section == "ads":
+            return "traits"
+        if self.section == "equipment":
+            return "equipment" if self.carried else "other_equipment"
+        return self.section
+
+    @property
     def added_in_foundry(self) -> bool:
         """True if this row has no GCS counterpart and needs a minted TID."""
         return not self.tid or bool(self.data.get("save"))

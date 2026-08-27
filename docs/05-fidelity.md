@@ -123,8 +123,11 @@ Disabled modifiers vanish entirely.
 
 **Provenance and organization**
 `source` (`{library, path, id}`) on 29 rows — the link back to the GCS master
-library, which drives GCS's "sync to library" feature · `tags[]` on traits and
-skills (equipment `tags` survive as `categories`).
+library, which drives GCS's "sync to library" feature · `tags[]` on **every**
+row type. An earlier draft of this document had equipment tags surviving as
+`categories`; they do not. `importEq` reads `i.categories`, and GCS v5 writes
+the field as `tags`, so `categories` is empty on every equipment row in every
+fixture.
 
 **Points inputs**
 Trait `base_points` / `points_per_level` / `can_level` / `round_down` /
@@ -240,3 +243,59 @@ verbatim.**
 Anything that materialises between two exports with no player action in between
 is by definition derived. That is a reusable test, and worth re-running against
 any future fixture pair.
+
+## 5.8 The control test, and the four corrections it forced
+
+The control export — taken immediately after import, nothing touched — gives an
+acceptance criterion sharp enough to be worth building around:
+
+> **Reconciling the control export against `container.gcs` must produce zero
+> applicable changes.**
+
+Anything it reports is by definition a phantom: something GGA does to the data
+on the way in that the comparison failed to account for. The first run reported
+**32 changed rows**. Each was a real defect in the field policy, not noise to be
+tuned away.
+
+**1. Weights lose their unit.** GCS `"2.25 lb"` arrives as `"2.25"`, because
+`importEq` divides `calc.extended_weight` by the quantity and keeps the number.
+Fixed with a quantity comparison that matches magnitudes and ignores a trailing
+unit. *(19 rows.)*
+
+**2. GGA fills absent values with `"0"`.** GCS omits `base_value` on anything
+free; Foundry reports `cost: "0"`. Writing that back adds a field the sheet
+never had. Fixed by suppressing a proposal that equals GGA's default when the
+base row omits the field — the same mechanism §5.3 needed for `legality_class`.
+*(18 rows.)*
+
+**3. Notes must be compared against a reconstruction, not against
+`local_notes`.** GGA glues every enabled modifier's *name* onto the note, so a
+row with modifiers reports a phantom edit forever. Fixed by replaying that
+concatenation from the base row and comparing against the result:
+
+```
+local_notes + "; " + each enabled modifier's name + "\n" + userdesc
+```
+
+One detail matters: GGA reads `modifier.notes`, but GCS v5 writes `local_notes`,
+so the parenthetical GGA means to add never appears. The reconstruction has to
+reproduce the bug, not the intent. Self-control rows are the one case this
+cannot handle — GGA replaces the note with a localized `[CR: name]` string — so
+those are skipped rather than guessed at. *(3 rows.)*
+
+**4. Equipment tags never survive at all.** `importEq` reads `i.categories`;
+GCS v5 calls the field `tags`. The mapping table had this as ⚙️ derivable and it
+is ❌. *(5 rows.)*
+
+That left two rows, both genuine and both correctly withheld: `Cloth, Padded`
+(modifier-inflated weight and value, §5.4) and `Poison doses in sealed gut`
+(unitless base weight on a metric sheet, `docs/04-mapping.md` §4.11).
+
+The reverse test is the played export, which must report **exactly** the edits
+that were actually made and nothing else. It does: the arrow count, the rename,
+four `equipped` flips (one action plus its three-row cascade), the deleted
+skill, the note edit, and HP/FP damage.
+
+Both directions are locked in `tests/test_reconcile.py`. The pair is worth more
+than either half: the control catches phantom changes, the played export catches
+missed ones, and neither alone would have caught all four corrections above.

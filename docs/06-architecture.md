@@ -206,9 +206,11 @@ the user swap.
 2. ~~GCS reader/writer that round-trips `sturm.gcs` **byte-identically**.~~
    **Done** — `src/json2gcs/jsonio.py`. Round-trips all three available GCS
    files byte-for-byte, including the container fixture.
-3. Reconciler + report. `--dry-run` becomes useful here, before anything is written.
-   *(`json2gcs inspect` is a first cut: it matches by TID and names the
-   ambiguous rows, but writes nothing.)*
+3. ~~Reconciler + report.~~ **Done** — `src/json2gcs/reconcile.py`,
+   `fields.py`, `report.py`, and `json2gcs diff`. Writes nothing.
+   The acceptance test is the control export: taken with nothing touched, it
+   must yield **zero** applicable changes. Getting there took four corrections,
+   each a real thing GGA does to the data (see `docs/05-fidelity.md` §5.8).
 4. Field policy table, starting with the ✅ rows only.
 5. ⚙️ rows (attributes via the points route, SM, tags, dates).
 6. 🔶 rows, each behind its own guard and each with a golden-test case.
