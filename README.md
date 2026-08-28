@@ -6,8 +6,12 @@ Converts a GURPS character exported from **Foundry VTT** (via the
 
 **Status: Phase 2 — the merge path works, and GCS itself verifies it.** Read a
 Foundry export and the original `.gcs`, and it writes a merged sheet that GCS
-loads and rewrites unchanged. Still to come: an end-to-end re-import back into
-Foundry, and packaging as an executable.
+loads and rewrites unchanged.
+
+**Picking this up?** Read [`docs/07-handoff.md`](docs/07-handoff.md) — current
+state, the agreed next steps, and the environment facts that are not
+discoverable from the code (notably: GCS lives at `C:\GOTProject\gcs\gcs.exe`
+and is not on `PATH`).
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -106,7 +110,8 @@ Read in order:
 | [`docs/03-foundry-format.md`](docs/03-foundry-format.md) | The Foundry actor export: the `00000` key convention, `contains`/`parentuuid`, section-by-section |
 | [`docs/04-mapping.md`](docs/04-mapping.md) | **The field mapping.** Every GCS field, its Foundry source, and how faithful it is |
 | [`docs/05-fidelity.md`](docs/05-fidelity.md) | Measured results on the sample pair, the full loss inventory, and the traps |
-| [`docs/06-architecture.md`](docs/06-architecture.md) | Proposed pipeline, verification strategy, language choice, build order |
+| [`docs/06-architecture.md`](docs/06-architecture.md) | Pipeline, verification strategy, language choice, build order |
+| [`docs/07-handoff.md`](docs/07-handoff.md) | **Current state, next steps, and the traps that cost time** |
 
 ## Layout
 
