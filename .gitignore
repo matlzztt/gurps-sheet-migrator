@@ -25,3 +25,9 @@ Thumbs.db
 # --- Python packaging ---
 *.egg-info/
 .pytest_cache/
+
+# Converter output — derived, not source
+/out/
+
+# Obsidian vault config
+.obsidian/
