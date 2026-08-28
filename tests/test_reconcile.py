@@ -61,7 +61,7 @@ def test_control_matches_every_row(control):
     assert control.summary()["matched"] == 78
     assert control.by_status(Status.ADDED) == []
     assert control.by_status(Status.MISSING) == []
-    assert not [d for d in control.deltas if d.moved_to]
+    assert not [d for d in control.deltas if d.moved]
 
 
 def test_control_reports_no_warnings(control):
@@ -90,9 +90,17 @@ def test_unitless_quantity_is_blocked_not_reported_as_an_edit(control):
     assert not change.applicable
 
 
-def test_sheet_name_difference_is_real(control):
-    """The Foundry actor really is called 'Container'; the sheet says 'Stürm'."""
-    change = next(c for c in control.profile if c.field == "name")
+def test_the_sheet_name_is_left_alone_by_default(control):
+    """The actor is called 'Container'; the sheet is 'Stürm' and stays that way."""
+    assert [c for c in control.profile if c.field == "name"] == []
+
+
+def test_rename_opts_the_name_difference_back_in(sheet):
+    """The difference is real; --rename is what acts on it."""
+    result = reconcile.reconcile(
+        foundry.load(DIR / "container.foundry.json"), sheet, rename=True
+    )
+    change = next(c for c in result.profile if c.field == "name")
     assert (change.old, change.new) == ("Stürm", "Container")
 
 
@@ -232,7 +240,6 @@ def test_report_names_the_real_changes(played):
 
 def test_report_on_a_clean_control_is_quiet(control):
     text = report.render(control)
-    assert "Changes to carry back" in text  # the profile name genuinely differs
     assert "follows its container" not in text
 
 

@@ -56,6 +56,9 @@ class Plan:
 
     dropped: list[RowDelta] = field(default_factory=list)
     kept: list[RowDelta] = field(default_factory=list)
+    moved: list[RowDelta] = field(default_factory=list)
+    """Rows re-attached somewhere else in the sheet."""
+
     added: list[tuple[RowDelta, str]] = field(default_factory=list)
     """(row, minted TID) for rows created inside Foundry."""
 
@@ -68,6 +71,7 @@ class Plan:
             len(self.applied)
             + len(self.dropped)
             + len(self.added)
+            + len(self.moved)
             + len(self.sheet_fields)
         )
 
@@ -107,6 +111,96 @@ def _detach(sheet_data: dict, entry, section: str) -> bool:
     return strip(sheet_data.get(section))
 
 
+def _section_list(data: dict, section: str) -> list:
+    """The sheet's list for ``section``, created in canonical order if absent."""
+    existing = data.get(section)
+    if isinstance(existing, list):
+        return existing
+    fresh: list = []
+    data[section] = fresh
+    order = schema.ENTITY_ORDER
+    reordered = sorted(
+        data.items(),
+        key=lambda kv: order.index(kv[0]) if kv[0] in order else len(order),
+    )
+    data.clear()
+    data.update(reordered)
+    return fresh
+
+
+def _prune_section(data: dict, section: str) -> None:
+    """Drop an emptied section: GCS's ``omitzero`` means it would not write it."""
+    if section in data and not data[section]:
+        data.pop(section)
+
+
+def _move_blocked(by_tid: dict, entry, section: str, parent_tid: str | None) -> str:
+    """Why this move must not be made, or ``""`` if it can be."""
+    if _KIND_FOR_SECTION.get(section) != _KIND_FOR_SECTION.get(entry.section):
+        return f"a {entry.section} row cannot become a {section} row"
+    if not parent_tid:
+        return ""
+    if parent_tid == entry.tid:
+        return "the export puts this row inside itself"
+    parent = by_tid.get(parent_tid)
+    if parent is None:
+        return f"its new container {parent_tid} is not in the sheet"
+    if any(descendant.tid == parent_tid for descendant in entry.walk()):
+        return "the export puts this row inside one of its own children"
+    if not parent.is_container:
+        # Containers are a distinct TID kind in GCS; giving a leaf row children
+        # would produce a row whose id contradicts its shape.
+        return f"its new container {parent.name!r} is not a container in the sheet"
+    return ""
+
+
+def _move_row(data: dict, sheet, delta: RowDelta) -> str:
+    """Detach a row from where it is and re-attach it where the export has it.
+
+    Returns a description of what was done, or ``""`` if nothing was.  A
+    container carries its children with it: they are nested inside its own
+    dict, so moving that one dict moves the whole subtree.
+    """
+    entry, row = delta.entry, delta.row
+    if entry is None or row is None:
+        return ""
+    section, parent_tid = row.gcs_section, row.parent_tid
+
+    old_parent = sheet.by_tid.get(entry.parent_tid) if entry.parent_tid else None
+    if not _detach(data, entry, entry.section):
+        return ""
+    _prune_section(data, entry.section)
+    if old_parent is not None:
+        old_parent.children = [c for c in old_parent.children if c is not entry]
+
+    new_parent = sheet.by_tid.get(parent_tid) if parent_tid else None
+    if new_parent is not None:
+        siblings = new_parent.data.setdefault("children", [])
+    else:
+        siblings = _section_list(data, section)
+
+    # Re-insert where the export has it, using the nearest following sibling
+    # that the sheet actually has as the anchor.
+    positions = {
+        candidate.get("id"): i
+        for i, candidate in enumerate(siblings)
+        if isinstance(candidate, dict)
+    }
+    at = len(siblings)
+    for tid in delta.move_before:
+        if tid in positions:
+            at = positions[tid]
+            break
+    siblings.insert(at, entry.data)
+
+    entry.parent_tid = parent_tid
+    if new_parent is not None:
+        new_parent.children.insert(min(at, len(new_parent.children)), entry)
+    for descendant in entry.walk():
+        descendant.section = section
+    return f"{delta.name}: {delta.moved_from_label} → {delta.moved_to_label}"
+
+
 def plan(
     result: Reconciliation,
     *,
@@ -115,9 +209,20 @@ def plan(
 ) -> Plan:
     """Decide what would be written, without writing it."""
     outcome = Plan()
+    # The sheet's rows, as seen through the reconciliation — plan() is given no
+    # sheet, and every sheet row it could move something into is in a delta.
+    by_tid = {d.tid: d.entry for d in result.deltas if d.entry is not None}
 
     for delta in result.deltas:
         if delta.status is Status.MATCHED:
+            if delta.moved and delta.entry is not None and delta.row is not None:
+                reason = _move_blocked(
+                    by_tid, delta.entry, delta.row.gcs_section, delta.row.parent_tid
+                )
+                if reason:
+                    outcome.skipped.append((delta, "position", reason))
+                else:
+                    outcome.moved.append(delta)
             for change in delta.changes:
                 if change.applicable or (include_lossy and not change.blocked):
                     outcome.applied.append((delta, change.field))
@@ -162,13 +267,30 @@ def apply(
             _set(delta.entry.data, delta.entry.section, change.field, change.new)
             outcome.applied.append((delta, change.field))
 
+    # ---- rows that changed container or list -------------------------------
+    # After the field edits, so a moved row's own edits land regardless of
+    # whether the move itself turns out to be possible.
+    for delta in result.deltas:
+        if not (delta.moved and delta.status is Status.MATCHED):
+            continue
+        if delta.entry is None or delta.row is None:
+            continue
+        reason = _move_blocked(
+            sheet.by_tid, delta.entry, delta.row.gcs_section, delta.row.parent_tid
+        )
+        if reason:
+            outcome.skipped.append((delta, "position", reason))
+            continue
+        note = _move_row(data, sheet, delta)
+        if note:
+            outcome.moved.append(delta)
+            outcome.notes.append(f"moved {note}")
+
     # ---- rows the export no longer has ------------------------------------
     for delta in result.by_status(Status.MISSING):
         if deletions == DeletionPolicy.DROP and delta.entry is not None:
             if _detach(data, delta.entry, delta.entry.section):
-                data.pop(delta.entry.section, None) if not data.get(
-                    delta.entry.section
-                ) else None
+                _prune_section(data, delta.entry.section)
                 sheet.by_tid.pop(delta.tid, None)
                 outcome.dropped.append(delta)
         else:
@@ -288,5 +410,5 @@ def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
     if parent is not None:
         parent.data.setdefault("children", []).append(fresh)
     else:
-        data.setdefault(section, []).append(fresh)
+        _section_list(data, section).append(fresh)
     return minted

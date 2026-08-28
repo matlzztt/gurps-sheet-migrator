@@ -4,7 +4,7 @@ Read [`README.md`](../README.md) first for what the project is. This file is the
 working state: what is done, what is next, and the things that cost time to
 learn and would cost it again.
 
-Last updated: 2026-08-27.
+Last updated: 2026-08-28.
 
 ## Where the project stands
 
@@ -16,7 +16,7 @@ GCS loads and rewrites unchanged.
 JSON2GCS_GCS="C:/GOTProject/gcs/gcs.exe" python -m pytest
 ```
 
-208 pass with GCS present; 199 pass and 9 skip without it. **A green run without
+231 pass with GCS present; 221 pass and 10 skip without it. **A green run without
 that env var is not a full run** — the oracle tests skip silently.
 
 | Module | State |
@@ -28,7 +28,7 @@ that env var is not a full run** — the oracle tests skip silently.
 | `fields.py` | done for traits/skills/equipment/notes; spells entries are **unvalidated** |
 | `reconcile.py` | done |
 | `schema.py` | done — key order validated against 154 real rows |
-| `apply.py` | done, except moved rows |
+| `apply.py` | done |
 | `report.py` | done |
 | `cli.py` | `inspect`, `diff`, `convert` |
 
@@ -36,15 +36,29 @@ that env var is not a full run** — the oracle tests skip silently.
 
 Decided with the user on 2026-08-27, in this order:
 
-1. **Name fix.** `convert` currently carries `profile.name` back from the Foundry
-   actor, which renames the GCS sheet to whatever the actor is called — in the
-   fixture, "Container". The user accepted the recommendation to **stop doing
-   that by default**. Not yet implemented. Touch `_diff_profile` in
-   `reconcile.py`; consider a `--rename` opt-in rather than deleting the code.
-2. **Moved rows.** `reconcile.py` already detects a changed parent or a move
-   between carried/other and reports it (`RowDelta.moved_from` / `moved_to`).
-   `apply.py` ignores it entirely — grep confirms no reference. Needs detaching
-   from the old parent and re-attaching in canonical order.
+1. ~~**Name fix.**~~ **Done 2026-08-28.** `reconcile()` takes `rename=False`;
+   `_diff_profile` only proposes `profile.name` when it is set, and `diff` and
+   `convert` both expose `--rename`. The control export now merges to *nothing
+   at all* — `test_a_control_export_changes_nothing` asserts the output is
+   byte-identical to the base sheet, which is a stronger invariant than the old
+   "one line plus the timestamp".
+2. ~~**Moved rows.**~~ **Done 2026-08-28.** `apply._move_row` detaches and
+   re-attaches; `_move_blocked` refuses the four impossible destinations
+   (missing container, a leaf, the row itself, its own descendant) and reports
+   them as skipped rather than corrupting the tree. Ordering comes from
+   `RowDelta.move_before` — the TIDs following the row at its destination in
+   the export — and the row is inserted before the nearest of those the sheet
+   actually has. Two things found on the way: a move *out* to the top level has
+   `moved_to = None`, so `RowDelta.moved` is now a separate flag rather than a
+   `moved_to` truth test; and carrying a container across to other equipment
+   re-sections every row inside it, which `_collapse_move_cascades` attributes
+   to the container instead of reporting eleven moves.
+
+   No fixture has a real move, so `tests/test_moves.py` synthesizes them by
+   relocating rows in the *control* export — which makes the move the only
+   difference the reconciler can find. GCS itself accepts the result
+   (`test_gcs_accepts_a_sheet_whose_rows_moved`) and leaves the row where we
+   put it.
 3. **Synthesize mode.** Mode B in [`01-problem.md`](01-problem.md): build a sheet
    from a Foundry export alone, with no base. `convert` currently requires a
    base. GCS ships defaults at `gcs/model/gurps/embedded_data/Standard.attr` and
@@ -99,6 +113,11 @@ the project. The control export was taken immediately after import with nothing
 touched, so a correct reconciler must find *zero* applicable changes in it. It
 started at 32 and every one was a real defect. If it starts failing, the fix is
 almost certainly in the field policy, not in the test.
+
+**`equipped` survives a move to other equipment.** Checked against the Go
+source: nothing in GCS production code clears the flag when an item stops being
+carried — `ReallyEquipped` is gated on which list the row is in, not on the
+flag. So a section move must leave `equipped` exactly as it found it.
 
 **Zero means delete.** Nearly every Go tag is `omitzero`, so GCS never writes
 `equipped: false` — it omits the key. `equipment.quantity` is the one row field

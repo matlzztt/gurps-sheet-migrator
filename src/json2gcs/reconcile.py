@@ -73,14 +73,35 @@ class RowDelta:
     changes: list[Change] = field(default_factory=list)
     row: foundry.Row | None = None
     entry: gcs.Entry | None = None
+    moved: bool = False
+    """True if the export puts this row somewhere other than where it is.
+
+    Distinct from ``moved_to``, which is ``None`` both when nothing moved and
+    when the row moved out to the top level of its section.
+    """
+
     moved_from: str | None = None
     moved_to: str | None = None
+    """Where the row was and where the export puts it: a parent TID when the
+    container changed, otherwise a section name.  ``None`` for a parent means
+    the top level of the section."""
+
+    moved_from_label: str = ""
+    moved_to_label: str = ""
+    """The same two places, named for a human to read."""
+
+    move_before: list[str] = field(default_factory=list)
+    """TIDs of the rows following this one at its destination in the export,
+    nearest first.  :mod:`json2gcs.apply` re-inserts before the first of them
+    that is actually there, which reproduces the export's ordering without
+    depending on rows the sheet may not have."""
+
     cascade_from: str | None = None
     """Set when this row's change was a side effect of a change to an ancestor."""
 
     @property
     def interesting(self) -> bool:
-        return self.status is not Status.MATCHED or bool(self.changes) or self.moved_to
+        return self.status is not Status.MATCHED or bool(self.changes) or self.moved
 
 
 @dataclass
@@ -113,7 +134,7 @@ class Reconciliation:
             "changed": len(self.changed_rows),
             "added": len(self.by_status(Status.ADDED)),
             "missing": len(self.by_status(Status.MISSING)),
-            "moved": sum(1 for d in self.deltas if d.moved_to),
+            "moved": sum(1 for d in self.deltas if d.moved),
             "sheet": len(self.profile) + len(self.attributes) + len(self.points),
         }
 
@@ -230,6 +251,37 @@ def _collapse_cascades(deltas: dict[str, RowDelta], actor: foundry.Actor) -> Non
             parent_tid = parent_row.parent_tid if parent_row else None
 
 
+def _collapse_move_cascades(
+    deltas: dict[str, RowDelta], actor: foundry.Actor
+) -> None:
+    """Drop the move flag from rows that only moved because a container did.
+
+    Carrying a container across to *other equipment* changes the section of
+    everything inside it, but the player made one move, not eleven — and the
+    children need no re-attaching, since they travel inside their parent's own
+    dict.  Only a section-only change can cascade: a row whose parent TID
+    changed was genuinely picked up and put somewhere else.
+    """
+    for delta in deltas.values():
+        row = delta.row
+        if not delta.moved or row is None or row.parent_tid != (
+            delta.entry.parent_tid if delta.entry else None
+        ):
+            continue
+        parent_tid = row.parent_tid
+        while parent_tid:
+            parent = deltas.get(parent_tid)
+            if parent is not None and parent.moved:
+                delta.moved = False
+                delta.moved_from = delta.moved_to = None
+                delta.moved_from_label = delta.moved_to_label = ""
+                delta.move_before = []
+                delta.cascade_from = parent_tid
+                break
+            parent_row = actor.by_tid.get(parent_tid)
+            parent_tid = parent_row.parent_tid if parent_row else None
+
+
 # --------------------------------------------------------------------------
 # sheet-level
 # --------------------------------------------------------------------------
@@ -267,12 +319,14 @@ _ATTR_POINTS = {
 }
 
 
-def _diff_profile(actor: foundry.Actor, sheet: gcs.Sheet) -> list[Change]:
+def _diff_profile(
+    actor: foundry.Actor, sheet: gcs.Sheet, *, rename: bool = False
+) -> list[Change]:
     changes: list[Change] = []
     traits = actor.system.get("traits") or {}
     profile = sheet.profile
 
-    if actor.name and actor.name != profile.get("name"):
+    if rename and actor.name and actor.name != profile.get("name"):
         changes.append(
             Change("name", "name", profile.get("name"), actor.name, Fidelity.EXACT)
         )
@@ -407,8 +461,63 @@ def _diff_points(actor: foundry.Actor, sheet: gcs.Sheet) -> list[Change]:
 # --------------------------------------------------------------------------
 
 
-def reconcile(actor: foundry.Actor, sheet: gcs.Sheet) -> Reconciliation:
-    """Compare an export against a base sheet. Writes nothing."""
+_SECTION_LABEL = {
+    "equipment": "carried equipment",
+    "other_equipment": "other equipment",
+}
+
+
+def _place_label(
+    parent_tid: str | None,
+    section: str,
+    sheet: gcs.Sheet,
+    actor: foundry.Actor | None = None,
+) -> str:
+    """Name a location a row can sit in, for the report to print."""
+    if not parent_tid:
+        return _SECTION_LABEL.get(section, section)
+    entry = sheet.by_tid.get(parent_tid)
+    if entry is not None:
+        return entry.name or parent_tid
+    row = actor.by_tid.get(parent_tid) if actor is not None else None
+    if row is not None:
+        return row.display_name or parent_tid
+    return parent_tid
+
+
+def _export_siblings(actor: foundry.Actor, row: foundry.Row) -> list[foundry.Row]:
+    """The rows sharing ``row``'s destination in the export, in order."""
+    if row.parent_tid:
+        parent = actor.by_tid.get(row.parent_tid)
+        return parent.children if parent is not None else []
+    return {
+        "traits": actor.traits,
+        "skills": actor.skills,
+        "spells": actor.spells,
+        "notes": actor.notes,
+        "equipment": actor.carried,
+        "other_equipment": actor.other,
+    }.get(row.gcs_section, [])
+
+
+def _following_siblings(actor: foundry.Actor, row: foundry.Row) -> list[str]:
+    siblings = _export_siblings(actor, row)
+    # By identity: two rows with the same content are still two rows.
+    position = next((i for i, s in enumerate(siblings) if s is row), None)
+    if position is None:
+        return []
+    return [s.tid for s in siblings[position + 1 :] if s.tid]
+
+
+def reconcile(
+    actor: foundry.Actor, sheet: gcs.Sheet, *, rename: bool = False
+) -> Reconciliation:
+    """Compare an export against a base sheet. Writes nothing.
+
+    The sheet's own name is left alone unless *rename* is set.  A Foundry actor
+    is often named for its folder or token rather than for the character, so
+    carrying its name back renames the sheet to something unwanted.
+    """
     result = Reconciliation()
     result.warnings.extend(actor.warnings)
     result.warnings.extend(sheet.warnings)
@@ -436,11 +545,19 @@ def reconcile(actor: foundry.Actor, sheet: gcs.Sheet) -> Reconciliation:
             entry=entry,
         )
         if row.parent_tid != entry.parent_tid:
+            delta.moved = True
             delta.moved_from = entry.parent_tid
             delta.moved_to = row.parent_tid
         elif row.gcs_section != entry.section:
+            delta.moved = True
             delta.moved_from = entry.section
             delta.moved_to = row.gcs_section
+        if delta.moved:
+            delta.moved_from_label = _place_label(entry.parent_tid, entry.section, sheet)
+            delta.moved_to_label = _place_label(
+                row.parent_tid, row.gcs_section, sheet, actor
+            )
+            delta.move_before = _following_siblings(actor, row)
         delta.changes = _diff_row(row, entry, sheet.settings)
         deltas[row.tid] = delta
 
@@ -456,11 +573,12 @@ def reconcile(actor: foundry.Actor, sheet: gcs.Sheet) -> Reconciliation:
         )
 
     _collapse_cascades(deltas, actor)
+    _collapse_move_cascades(deltas, actor)
 
     result.deltas = sorted(
         deltas.values(), key=lambda d: (_SECTION_ORDER.get(d.section, 9), d.name.lower())
     )
-    result.profile = _diff_profile(actor, sheet)
+    result.profile = _diff_profile(actor, sheet, rename=rename)
     result.attributes = _diff_attributes(actor, sheet)
     result.points = _diff_points(actor, sheet)
     return result

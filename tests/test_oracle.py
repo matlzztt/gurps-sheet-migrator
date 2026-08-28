@@ -168,3 +168,30 @@ def test_find_gcs_honours_an_explicit_path(tmp_path: Path):
     fake.write_text("", encoding="utf-8")
     assert cli.find_gcs(str(fake)) == fake
     assert cli.find_gcs(str(tmp_path / "nope.exe")) is None
+
+
+@needs_gcs
+def test_gcs_accepts_a_sheet_whose_rows_moved(tmp_path: Path):
+    """A relocated row is still a row GCS is happy to load and rewrite.
+
+    Re-parenting is the one edit that changes the sheet's shape rather than a
+    value in it, so it is the one most likely to produce something that parses
+    here and not there.
+    """
+    from test_moves import BACKPACK, YARQAP, _moved  # noqa: PLC0415
+
+    sheet = gcs.load(DIR / "container.gcs")
+    actor = _moved(tid=YARQAP, frm=["carried"], to=["carried", BACKPACK])
+    plan = apply.apply(reconcile.reconcile(actor, sheet), sheet)
+    assert len(plan.moved) == 1
+
+    ours = tmp_path / "moved.gcs"
+    jsonio.dump(ours, sheet.data)
+    theirs = jsonio.loads(_gcs_rewrite(ours, tmp_path / "sub").decode("utf-8"))
+
+    mine = jsonio.loads(jsonio.read_text(ours))
+    assert jsonio.dumps(cli._strip_calc(mine)) == jsonio.dumps(cli._strip_calc(theirs))
+
+    # And GCS kept it where we put it, rather than hoisting it back out.
+    backpack = gcs.load(ours).by_tid[BACKPACK]
+    assert YARQAP in [child["id"] for child in backpack.data["children"]]

@@ -148,11 +148,14 @@ def render(result: Reconciliation, *, verbose: bool = False) -> str:
         out.append("    Nothing in either file tells them apart, so these are kept.")
         out.append("")
 
-    moved = [d for d in result.deltas if d.moved_to]
+    moved = [d for d in result.deltas if d.moved]
     if moved:
         out.append(f"Moved ({len(moved)})")
         for delta in moved:
-            out.append(f"    {delta.name}: {delta.moved_from} → {delta.moved_to}")
+            out.append(
+                f"    {delta.name}: {delta.moved_from_label} → "
+                f"{delta.moved_to_label}"
+            )
         out.append("")
 
     # ---- things a human has to decide -------------------------------------

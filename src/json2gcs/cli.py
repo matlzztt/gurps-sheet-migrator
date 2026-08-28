@@ -74,7 +74,7 @@ def cmd_diff(args: argparse.Namespace) -> int:
     print(f"Foundry export : {export}   ({actor.name}, GGA {actor.system_version})")
     print(f"Base GCS sheet : {base}")
     print()
-    result = reconcile.reconcile(actor, sheet)
+    result = reconcile.reconcile(actor, sheet, rename=args.rename)
     print(report.render(result, verbose=args.verbose))
     return 1 if result.warnings else 0
 
@@ -256,7 +256,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
             "choose a different -o, or pass --force"
         )
 
-    result = reconcile.reconcile(actor, sheet)
+    result = reconcile.reconcile(actor, sheet, rename=args.rename)
     print(report.render(result))
     print()
 
@@ -266,8 +266,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
         )
         print(
             f"Dry run: would write {len(outcome.applied)} field change(s), "
-            f"{len(outcome.added)} new row(s), drop {len(outcome.dropped)}, "
-            f"keep {len(outcome.kept)}."
+            f"{len(outcome.added)} new row(s), move {len(outcome.moved)}, "
+            f"drop {len(outcome.dropped)}, keep {len(outcome.kept)}."
         )
         print(f"Nothing written. Output would be {out}")
         return 0
@@ -283,7 +283,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
     print(
         f"Wrote {out}  "
         f"({len(outcome.applied)} field change(s), {len(outcome.added)} new row(s), "
-        f"{len(outcome.dropped)} dropped, {len(outcome.kept)} kept)"
+        f"{len(outcome.moved)} moved, {len(outcome.dropped)} dropped, "
+        f"{len(outcome.kept)} kept)"
     )
     for note in outcome.notes:
         if args.refresh_calc and note.startswith("calc blocks"):
@@ -347,6 +348,14 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument(
         "-v", "--verbose", action="store_true", help="also list unchanged rows"
     )
+    diff.add_argument(
+        "--rename",
+        action="store_true",
+        help=(
+            "also carry the Foundry actor's name back to the sheet. Off by "
+            "default: the actor is often named for its token or folder"
+        ),
+    )
     diff.set_defaults(func=cmd_diff)
 
     convert = sub.add_parser(
@@ -401,6 +410,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--gcs",
         metavar="PATH",
         help="path to the GCS executable (or set JSON2GCS_GCS)",
+    )
+    convert.add_argument(
+        "--rename",
+        action="store_true",
+        help=(
+            "also carry the Foundry actor's name back to the sheet. Off by "
+            "default: the actor is often named for its token or folder"
+        ),
     )
     convert.set_defaults(func=cmd_convert)
     return parser

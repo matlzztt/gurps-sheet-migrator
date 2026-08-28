@@ -79,6 +79,16 @@ Foundry value is known to be contaminated (a post-modifier weight, say). Rows
 missing from the export are kept by default — they are ambiguous — and
 `--deletions drop` removes them instead.
 
+A row put into a different container, or moved between carried and other
+equipment, is re-attached where the export has it — in the export's own order,
+and carrying its children with it. A move with nowhere valid to land (into a
+container the sheet does not have, or into a row that is not a container) is
+reported and skipped rather than forced.
+
+The sheet's own character name is left alone. A Foundry actor is often named
+for its token or its folder rather than for the character, so carrying that
+name back would silently retitle the sheet; pass `--rename` if you do want it.
+
 ## The short version
 
 GGA can import `.gcs` into Foundry. Nothing goes the other way. But GGA copies
@@ -127,7 +137,7 @@ src/json2gcs/
   apply.py               writes a reconciliation into the base sheet
   report.py              renders a reconciliation as readable text
   cli.py                 command line entry point
-tests/                   pytest suite (208 tests)
+tests/                   pytest suite (231 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
 samples/container/       container + known-changelog fixture set

@@ -174,11 +174,21 @@ def test_everything_foundry_never_knew_about_survives():
     assert sheet.data["created_date"] == before.data["created_date"]
 
 
-def test_a_control_export_changes_almost_nothing():
-    """Only the character name genuinely differs on the control export."""
+def test_a_control_export_changes_nothing():
+    """Nothing was touched in play, so the merged sheet is the base sheet."""
     before = jsonio.read_text(SHEET)
     sheet, plan = merge(CONTROL)
     assert [f for _, f in plan.applied] == []
+    assert plan.sheet_fields == []
+    assert jsonio.dumps(sheet.data) == before
+
+
+def test_rename_is_the_one_thing_a_control_export_can_still_change():
+    """The actor name really does differ; --rename is what carries it back."""
+    before = jsonio.read_text(SHEET)
+    sheet = gcs.load(SHEET)
+    result = reconcile.reconcile(foundry.load(CONTROL), sheet, rename=True)
+    plan = apply.apply(result, sheet, now=STAMP)
     assert plan.sheet_fields == ["name"]
     after = jsonio.dumps(sheet.data)
     # The name and the timestamp; nothing else.

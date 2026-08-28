@@ -212,14 +212,31 @@ def test_convert_dry_run_writes_nothing(capsys, tmp_path):
     assert "Dry run" in text and "Nothing written" in text
 
 
-def test_convert_on_a_control_export_is_nearly_a_no_op(capsys, tmp_path):
+def test_convert_on_a_control_export_is_a_no_op(capsys, tmp_path):
     out = tmp_path / "merged.gcs"
     code, text = run(
         capsys, "convert", str(CCONTROL), "--base", str(CSHEET), "-o", str(out)
     )
     assert code == 0
-    # Only the character name differs, so it does write — but nothing per-row.
+    assert "Nothing to carry back" in text
+    assert not out.exists()
+
+
+def test_rename_carries_the_actor_name_back(capsys, tmp_path):
+    out = tmp_path / "merged.gcs"
+    code, text = run(
+        capsys,
+        "convert",
+        str(CCONTROL),
+        "--base",
+        str(CSHEET),
+        "-o",
+        str(out),
+        "--rename",
+    )
+    assert code == 0
     assert "0 new row(s)" in text and "0 dropped" in text
+    assert json.loads(out.read_text(encoding="utf-8"))["profile"]["name"] == "Container"
 
 
 def test_convert_can_drop_ambiguous_deletions(capsys, tmp_path):
