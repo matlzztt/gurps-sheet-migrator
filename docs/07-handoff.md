@@ -16,7 +16,7 @@ GCS loads and rewrites unchanged.
 JSON2GCS_GCS="C:/GOTProject/gcs/gcs.exe" python -m pytest
 ```
 
-231 pass with GCS present; 221 pass and 10 skip without it. **A green run without
+262 pass with GCS present; 248 pass and 14 skip without it. **A green run without
 that env var is not a full run** — the oracle tests skip silently.
 
 | Module | State |
@@ -30,7 +30,8 @@ that env var is not a full run** — the oracle tests skip silently.
 | `schema.py` | done — key order validated against 154 real rows |
 | `apply.py` | done |
 | `report.py` | done |
-| `cli.py` | `inspect`, `diff`, `convert` |
+| `synthesize.py` | done — mode B, as merge against an empty sheet |
+| `cli.py` | `inspect`, `diff`, `convert` (merge or `--synthesize`) |
 
 ## The agreed pipeline
 
@@ -59,16 +60,49 @@ Decided with the user on 2026-08-27, in this order:
    difference the reconciler can find. GCS itself accepts the result
    (`test_gcs_accepts_a_sheet_whose_rows_moved`) and leaves the row where we
    put it.
-3. **Synthesize mode.** Mode B in [`01-problem.md`](01-problem.md): build a sheet
-   from a Foundry export alone, with no base. `convert` currently requires a
-   base. GCS ships defaults at `gcs/model/gurps/embedded_data/Standard.attr` and
-   `Humanoid.body` to seed `settings`.
+3. ~~**Synthesize mode.**~~ **Done 2026-08-28.** `convert --synthesize`. It is
+   *merge against an empty sheet*, not a second implementation: the reconciler
+   sees a base with no rows, every export row is therefore ADDED, and the
+   existing writer does the work.
+
+   The seed did not need transcribing from `Standard.attr` and `Humanoid.body`
+   after all. **Hand GCS a file containing `{"version":5}` and it writes back
+   the entire default sheet** — attributes, body plan, page settings, 13 KB of
+   it. That output is `src/json2gcs/data/default.gcs`, and
+   `test_the_template_is_what_gcs_itself_produces` re-derives it from GCS on
+   every run, so it can never drift into a transcription.
+
+   Comparing our first output against GCS's rewrite of it found four real
+   defects, none of which merge mode could have exposed: traits were getting
+   `points` (the field is `base_points`; GCS discards the wrong name silently,
+   so the value was simply lost), `profile` keys were written in policy order
+   rather than GCS's (`handedness` precedes `gender`), zero `base_points` was
+   written where `omitzero` means omit, and techniques lost their `q` TIDs.
+
+   Prerequisites fixed along the way, both of which also affect merge mode:
+   `_add_row` never registered what it created in `sheet.by_tid`, so a row
+   nested inside a *newly created* container silently landed at the top level;
+   and added rows were written in the report's alphabetical order rather than
+   the export's. `RowDelta.order` records the depth-first position, which fixes
+   the ordering and guarantees a container exists before its contents.
 4. **Packaging.** `pyinstaller --onefile`, then a GUI. The stated end goal is
-   "a few clicks".
+   "a few clicks". Note that `src/json2gcs/data/default.gcs` is package data,
+   not optional — `--synthesize` cannot run without it, so the spec file needs
+   it bundled.
 
 **Spells were explicitly deprioritised.** The user has no casters, every fixture
 has `spells: {}`, and the policy entries in `fields.py` have never executed.
 Treat them as unwritten code, not as working code.
+
+## What to improve next
+
+[`08-improvements.md`](08-improvements.md) is the backlog: every known gap, how
+it was found, and what fixing it takes. The two with the most value per line
+changed are **driving `apply._add_row` from `fields.RULES`** (synthesize mode
+currently drops every item's weight, value, legality class, tech level and uses
+— the policy already knows how to read all of them) and **decomposing the
+names GGA composes** (`"Survival (Swampland)"` should be a name plus a
+specialization).
 
 ## What would actually de-risk this
 
@@ -82,6 +116,17 @@ and see what breaks. Untested in particular:
 - a skill raised with earned points
 - rows added inside Foundry (the code exists; a real GGA-minted id has never
   been seen — `_getGGAId` in `actor-sheet.js`, and it is **not** a TID)
+
+**A row nested inside a Foundry-created *container* loses the link.**
+`foundry._build_rows` passes the parent's `uuid` down as `parent_tid`, and sets
+that uuid to `None` when it is not a valid TID — so a child of a GGA-minted
+container arrives with no parent and lands at the top level of its section.
+Everything else about added rows now works, including nesting inside a
+container that carries a real TID
+(`test_a_row_added_inside_a_newly_added_container_nests_correctly`). Fixing
+this properly needs the raw GGA id threaded through as a second linkage key,
+and a real fixture to check it against — which is the same fixture the item
+above is waiting for.
 
 ## Environment facts that are not discoverable
 
@@ -113,6 +158,21 @@ the project. The control export was taken immediately after import with nothing
 touched, so a correct reconciler must find *zero* applicable changes in it. It
 started at 32 and every one was a real defect. If it starts failing, the fix is
 almost certainly in the field policy, not in the test.
+
+**A synthesized sheet is not a GCS fixed point until GCS has seen it once.**
+GCS appends a `points_record` entry with reason "Reconciliation" the first time
+it opens one, because the total the export reported is not the total GCS
+computes from the rows. That is GCS doing its job on a character it has never
+met, not a defect — `--refresh-calc` settles it, and after that the file
+rewrites to itself byte for byte.
+
+**A skill's difficulty letter is not recoverable.** Foundry keeps
+`relativelevel` (`"IQ+1"`), which names the controlling attribute but not
+Easy/Average/Hard/Very Hard. Synthesize writes `iq/e` — the real attribute
+with GCS's own default letter — because `difficulty` is not omitzero, so the
+choice is between GCS's default *with* the attribute and GCS's default
+*without* it. A technique gets `a`, which is what GCS's own `NewTechnique`
+sets.
 
 **`equipped` survives a move to other equipment.** Checked against the Go
 source: nothing in GCS production code clears the flag when an item stops being

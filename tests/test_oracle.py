@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from json2gcs import apply, cli, foundry, gcs, jsonio, reconcile
+from json2gcs import apply, cli, foundry, gcs, jsonio, reconcile, synthesize
 
 REPO = Path(__file__).resolve().parent.parent
 DIR = REPO / "samples" / "container"
@@ -195,3 +195,81 @@ def test_gcs_accepts_a_sheet_whose_rows_moved(tmp_path: Path):
     # And GCS kept it where we put it, rather than hoisting it back out.
     backpack = gcs.load(ours).by_tid[BACKPACK]
     assert YARQAP in [child["id"] for child in backpack.data["children"]]
+
+
+@needs_gcs
+def test_the_template_is_what_gcs_itself_produces(tmp_path: Path):
+    """The synthesize template must stay GCS's defaults, not a transcription.
+
+    Hand GCS a stub with nothing but a version and it fills in the whole
+    default sheet -- attributes, body plan, page settings. That output *is*
+    ``data/default.gcs``. If GCS's defaults change, this fails, and the fix is
+    to recapture the template rather than to edit it.
+    """
+    stub = tmp_path / "stub.gcs"
+    stub.write_text('{"version":5}', encoding="utf-8", newline="")
+    ok, detail = cli.run_gcs_convert(BINARY, stub)
+    assert ok, detail
+
+    produced = jsonio.loads(stub.read_text(encoding="utf-8"))
+    template = jsonio.loads(jsonio.read_text(synthesize.TEMPLATE))
+    # The entity id is minted per file, and blank_sheet replaces it anyway.
+    produced.pop("id"), template.pop("id")
+    assert jsonio.dumps(produced) == jsonio.dumps(template)
+
+
+@needs_gcs
+def test_gcs_accepts_a_synthesized_sheet(tmp_path: Path):
+    """Mode B's whole claim is 'structurally valid'. This is what tests it."""
+    sheet, _, _ = synthesize.synthesize(foundry.load(DIR / "container.foundry.json"))
+    ours = tmp_path / "new.gcs"
+    jsonio.dump(ours, sheet.data)
+
+    theirs = jsonio.loads(_gcs_rewrite(ours, tmp_path / "sub").decode("utf-8"))
+    mine = jsonio.loads(jsonio.read_text(ours))
+
+    # GCS adds a points_record entry reconciling the total it computes against
+    # the one the export reported -- it has never seen this character before.
+    # That is GCS doing its job, and it is the only structural difference.
+    assert "points_record" not in mine
+    assert [r["reason"] for r in theirs["points_record"]] == ["Reconciliation"]
+    del theirs["points_record"]
+
+    assert jsonio.dumps(cli._strip_calc(mine)) == jsonio.dumps(
+        cli._strip_calc(theirs)
+    ), "GCS disagrees with something we wrote"
+
+
+@needs_gcs
+def test_a_synthesized_sheet_settles_after_one_pass(tmp_path: Path):
+    """Once GCS has recorded its reconciliation, the file is a fixed point."""
+    out = tmp_path / "new.gcs"
+    code = cli.main(
+        [
+            "convert",
+            str(DIR / "container.foundry.json"),
+            "--synthesize",
+            "-o",
+            str(out),
+            "--refresh-calc",
+        ]
+    )
+    assert code == 0
+    assert _gcs_rewrite(out, tmp_path / "sub") == out.read_bytes()
+
+
+@needs_gcs
+def test_a_synthesized_sheet_can_be_merged_into_later(tmp_path: Path):
+    """Rows keep their TIDs, so the sheet mode B produces is a usable base:
+    the same export reconciles against it with nothing left to carry back."""
+    sheet, _, _ = synthesize.synthesize(foundry.load(DIR / "container.foundry.json"))
+    out = tmp_path / "new.gcs"
+    jsonio.dump(out, sheet.data)
+    cli.run_gcs_convert(BINARY, out)
+
+    again = reconcile.reconcile(
+        foundry.load(DIR / "container.foundry.json"), gcs.load(out)
+    )
+    assert again.by_status(reconcile.Status.ADDED) == []
+    assert again.by_status(reconcile.Status.MISSING) == []
+    assert [d.name for d in again.deltas if d.moved] == []

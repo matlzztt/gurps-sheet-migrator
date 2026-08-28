@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
-from . import schema
+from . import gcs, schema
 from . import tid as tidmod
 from .jsonio import Num
 from .reconcile import Reconciliation, RowDelta, Status
@@ -296,8 +296,11 @@ def apply(
         else:
             outcome.kept.append(delta)
 
-    # ---- rows created inside Foundry --------------------------------------
-    for delta in result.by_status(Status.ADDED):
+    # ---- rows the base sheet does not have --------------------------------
+    # In export order, which is depth-first: a container is therefore created
+    # before anything that needs to nest inside it, and the rows land in the
+    # order the player has them rather than in the report's reading order.
+    for delta in sorted(result.by_status(Status.ADDED), key=lambda d: d.order):
         minted = _add_row(data, sheet, delta)
         if minted:
             outcome.added.append((delta, minted))
@@ -309,6 +312,11 @@ def apply(
             profile.pop(change.field, None)
         else:
             profile[change.field] = change.new
+            # Profile has its own key order, and it is not the one the field
+            # policy iterates in: GCS writes handedness before gender.
+            reordered = sorted(profile.items(), key=lambda kv: schema.profile_key(kv[0]))
+            profile.clear()
+            profile.update(reordered)
         outcome.sheet_fields.append(change.field)
 
     for change in result.attributes:
@@ -363,12 +371,78 @@ _KIND_FOR_SECTION = {
 }
 
 
-def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
-    """Create a minimal GCS row for something added inside Foundry.
+def _row_id(row, section: str, sheet) -> str | None:
+    """The TID a new row should carry: its own if usable, otherwise a fresh one.
 
-    Foundry-created rows carry a GGA-generated id rather than a TID, so a fresh
-    one is minted with the kind prefix its section requires — GGA reads the row
-    type back off that letter, so the wrong prefix produces a mistyped row.
+    Foundry-created rows have a GGA-generated id rather than a TID, so those
+    need minting with the kind prefix the section requires — GGA reads the row
+    type back off that letter, and the wrong prefix produces a mistyped row.
+
+    A row that *does* carry a real TID keeps it.  In synthesize mode that is
+    the common case: the actor came from a GCS sheet we simply do not have, and
+    reusing the original id means a later merge against the recovered sheet
+    still lines up.
+    """
+    kind = _KIND_FOR_SECTION.get(section)
+    if kind is None:
+        return None
+    container = bool(row.children)
+    existing = row.tid
+    if (
+        existing
+        and tidmod.is_valid(existing)
+        and existing not in sheet.by_tid
+        and tidmod.is_container(existing) == container
+        and (
+            existing[0].lower() == kind.lower()
+            # A technique lives in the skills section under its own kind
+            # letter, the same exception foundry.py makes when reading.
+            or (section == "skills" and existing[0] == tidmod.Kind.TECHNIQUE)
+        )
+    ):
+        return existing
+    return tidmod.mint(kind, container=container)
+
+
+#: What GCS uses when a skill has no difficulty at all. Not a guess of ours:
+#: it is the zero value of ``skill.Difficulty``, and it is what GCS writes into
+#: a row that arrives without one.
+DEFAULT_DIFFICULTY = "e"
+
+
+#: What GCS's own ``NewTechnique`` sets. A technique is relative to a base
+#: skill, so it has no controlling attribute to name.
+TECHNIQUE_DIFFICULTY = "a"
+
+
+def _skill_difficulty(row) -> str:
+    """``"iq/e"`` — the controlling attribute from the export, GCS's default letter.
+
+    Foundry keeps only ``relativelevel`` (``"IQ+1"``), which names the attribute
+    a skill is based on but not whether it is Easy, Average, Hard or Very Hard
+    (docs/04-mapping.md).  The attribute half is real information and is
+    otherwise thrown away; the letter is not recoverable and has to be fixed in
+    GCS.  ``difficulty`` is written either way — the field is not omitzero — so
+    the choice is between GCS's default with the attribute and GCS's default
+    without it.
+    """
+    if row.data.get("type") == "TECHNIQUE" or (
+        row.tid and row.tid[0] == tidmod.Kind.TECHNIQUE
+    ):
+        return TECHNIQUE_DIFFICULTY
+    relative = str(row.data.get("relativelevel") or "").strip()
+    attribute = ""
+    for char in relative:
+        if not char.isalpha():
+            break
+        attribute += char
+    if not attribute:
+        return ""
+    return f"{attribute.lower()}/{DEFAULT_DIFFICULTY}"
+
+
+def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
+    """Create a minimal GCS row for something the base sheet does not have.
 
     The result is deliberately sparse.  Only what Foundry actually holds is
     written; GCS fills in the rest and the player can finish the row there.
@@ -377,11 +451,10 @@ def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
     if row is None:
         return None
     section = delta.section
-    kind = _KIND_FOR_SECTION.get(section)
-    if kind is None:
+    minted = _row_id(row, section, sheet)
+    if minted is None:
         return None
 
-    minted = tidmod.mint(kind, container=bool(row.children))
     fresh: dict[str, Any] = {"id": minted}
 
     if section in ("equipment", "other_equipment"):
@@ -394,9 +467,19 @@ def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
         fresh["markdown"] = row.data.get("notes") or ""
     else:
         fresh["name"] = row.display_name
+        if section == "skills" and not row.children:
+            difficulty = _skill_difficulty(row)
+            if difficulty:
+                fresh["difficulty"] = difficulty
         points = row.data.get("points")
-        if points not in (None, ""):
-            fresh["points"] = Num(str(points))
+        # Traits spell it 'base_points'; skills and spells spell it 'points'.
+        # GCS silently discards the wrong one, so this is not cosmetic. A
+        # container has no points of its own -- GCS sums its children.
+        if points not in (None, "") and not row.children:
+            key = "base_points" if section == "traits" else "points"
+            value = Num(str(points))
+            if not schema.is_zero(value):
+                fresh[key] = value
 
     if row.data.get("notes") and section != "notes":
         fresh["local_notes"] = row.data["notes"]
@@ -406,9 +489,23 @@ def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
     reordered = sorted(fresh.items(), key=lambda kv: schema.order_key(section, kv[0]))
     fresh = dict(reordered)
 
+    # 'children' is not created here: it is last in every section's key order,
+    # so the setdefault a child does lands it in the right place, and a
+    # container that ends up with none must not carry an empty omitzero list.
     parent = sheet.by_tid.get(row.parent_tid) if row.parent_tid else None
     if parent is not None:
         parent.data.setdefault("children", []).append(fresh)
     else:
         _section_list(data, section).append(fresh)
+
+    # Register it, so rows created later in this same run can nest inside it.
+    entry = gcs.Entry(
+        tid=minted,
+        section=section,
+        data=fresh,
+        parent_tid=parent.tid if parent is not None else None,
+    )
+    sheet.by_tid[minted] = entry
+    if parent is not None:
+        parent.children.append(entry)
     return minted

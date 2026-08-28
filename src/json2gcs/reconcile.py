@@ -99,6 +99,15 @@ class RowDelta:
     cascade_from: str | None = None
     """Set when this row's change was a side effect of a change to an ancestor."""
 
+    order: int = -1
+    """Where the row sits in the export, depth-first.
+
+    ``deltas`` is sorted for reading; this preserves the order the player
+    actually has, and because the walk is depth-first it also guarantees a
+    container is seen before anything inside it.  :mod:`json2gcs.apply` needs
+    both when it creates rows.
+    """
+
     @property
     def interesting(self) -> bool:
         return self.status is not Status.MATCHED or bool(self.changes) or self.moved
@@ -524,7 +533,7 @@ def reconcile(
 
     deltas: dict[str, RowDelta] = {}
 
-    for row in actor.rows():
+    for position, row in enumerate(actor.rows()):
         if row.tid is None or row.tid not in sheet.by_tid:
             deltas[row.tid or f"?{id(row)}"] = RowDelta(
                 tid=row.tid or "(none)",
@@ -532,6 +541,7 @@ def reconcile(
                 name=row.display_name,
                 status=Status.ADDED,
                 row=row,
+                order=position,
             )
             continue
 
@@ -543,6 +553,7 @@ def reconcile(
             status=Status.MATCHED,
             row=row,
             entry=entry,
+            order=position,
         )
         if row.parent_tid != entry.parent_tid:
             delta.moved = True

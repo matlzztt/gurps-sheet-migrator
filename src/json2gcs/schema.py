@@ -115,6 +115,23 @@ ENTITY_ORDER = (
 )
 
 
+#: ``profile``'s keys, from Profile in profile.go. Note that ``handedness``
+#: precedes ``gender``, which is not the order anything else lists them in.
+PROFILE_ORDER = (
+    "name", "age", "birthday", "eyes", "hair", "skin", "handedness", "gender",
+    "height", "weight", "player_name", "title", "organization", "religion",
+    "tech_level", "portrait", "SM",
+)
+
+
+def profile_key(key: str) -> tuple[int, str]:
+    """Sort key placing a ``profile`` field where GCS would write it."""
+    try:
+        return (PROFILE_ORDER.index(key), "")
+    except ValueError:
+        return (len(PROFILE_ORDER), key)
+
+
 def order_key(section: str, key: str) -> tuple[int, str]:
     """Sort key placing ``key`` where GCS would write it.
 

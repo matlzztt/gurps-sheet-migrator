@@ -4,7 +4,7 @@ Converts a GURPS character exported from **Foundry VTT** (via the
 [GURPS Game Aid](https://github.com/crnormand/gurps) system) back into a **GCS**
 (`.gcs`) character sheet — closing a loop that currently only runs one way.
 
-**Status: Phase 2 — the merge path works, and GCS itself verifies it.** Read a
+**Status: Phase 2 — both modes work, and GCS itself verifies them.** Read a
 Foundry export and the original `.gcs`, and it writes a merged sheet that GCS
 loads and rewrites unchanged.
 
@@ -70,6 +70,20 @@ json2gcs convert actor.json --base character.gcs --refresh-calc --verify
 
 Point at the binary with `--gcs PATH` or `JSON2GCS_GCS` if it is not on `PATH`.
 
+For an actor that was never in GCS — a GCA import, a hand-built NPC, or a
+character whose `.gcs` is lost — build a sheet from the export alone:
+
+```bash
+json2gcs convert actor.json --synthesize --refresh-calc
+```
+
+The defaults are GCS's own: the template it starts from is what GCS writes when
+handed a stub file, and a test re-derives it from the application on every run.
+Rows keep the TIDs they already had, so the result is a usable base to merge
+into later. Honestly lower fidelity, though — modifiers, features, tags,
+library links and a skill's difficulty letter are not in a Foundry export to
+recover, and `docs/07-handoff.md` says so field by field.
+
 `inspect` gives a plainer summary of one export. `inspect` and `diff` never
 write; `convert` writes only to its output file.
 
@@ -122,6 +136,7 @@ Read in order:
 | [`docs/05-fidelity.md`](docs/05-fidelity.md) | Measured results on the sample pair, the full loss inventory, and the traps |
 | [`docs/06-architecture.md`](docs/06-architecture.md) | Pipeline, verification strategy, language choice, build order |
 | [`docs/07-handoff.md`](docs/07-handoff.md) | **Current state, next steps, and the traps that cost time** |
+| [`docs/08-improvements.md`](docs/08-improvements.md) | The backlog: known gaps, how each was found, and what closing it takes |
 
 ## Layout
 
@@ -135,9 +150,10 @@ src/json2gcs/
   reconcile.py           matches by TID and diffs under that policy
   schema.py              canonical GCS key order and omitzero rules
   apply.py               writes a reconciliation into the base sheet
+  synthesize.py          mode B: a new sheet from the export alone
   report.py              renders a reconciliation as readable text
   cli.py                 command line entry point
-tests/                   pytest suite (231 tests)
+tests/                   pytest suite (262 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
 samples/container/       container + known-changelog fixture set

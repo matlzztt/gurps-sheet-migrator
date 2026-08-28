@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 
 from . import apply as applymod
-from . import foundry, gcs, jsonio, reconcile, report, tid
+from . import foundry, gcs, jsonio, reconcile, report, synthesize, tid
 from . import __version__
 
 
@@ -243,6 +243,15 @@ def _verify_with_gcs(path: Path, binary: Path) -> tuple[bool, list[str]]:
 def cmd_convert(args: argparse.Namespace) -> int:
     export = Path(args.export)
     actor = foundry.load(export)
+
+    if args.synthesize:
+        if args.base:
+            raise ValueError(
+                "--synthesize builds a sheet from the export alone; drop --base "
+                "(or drop --synthesize to merge into it)"
+            )
+        return _convert_synthesized(args, actor, export)
+
     base = _resolve_base(args, actor, export)
     sheet = gcs.load(base)
 
@@ -293,28 +302,75 @@ def cmd_convert(args: argparse.Namespace) -> int:
     if outcome.skipped:
         print(f"  · {len(outcome.skipped)} change(s) left for review — see above")
 
-    if args.verify or args.refresh_calc:
-        binary = find_gcs(args.gcs)
-        if binary is None:
-            print(
-                "  · GCS not found — pass --gcs PATH or set JSON2GCS_GCS to enable "
-                "verification"
-            )
-            return 0
-        if args.refresh_calc:
-            ok, detail = run_gcs_convert(binary, out)
-            if not ok:
-                print(f"  · refresh-calc failed: {detail}")
-                return 1
-            print("  · calc refreshed by GCS itself; the file is now exactly what "
-                  "GCS would save")
-        if args.verify:
-            ok, lines = _verify_with_gcs(out, binary)
-            for i, line in enumerate(lines):
-                print(f"  · verify: {line}" if i == 0 else f"             {line}")
-            if not ok:
-                return 1
+    return _hand_to_gcs(args, out)
+
+
+def _hand_to_gcs(args: argparse.Namespace, out: Path) -> int:
+    """Run the written file back through GCS, if asked and if GCS is there."""
+    if not (args.verify or args.refresh_calc):
+        return 0
+    binary = find_gcs(args.gcs)
+    if binary is None:
+        print(
+            "  · GCS not found — pass --gcs PATH or set JSON2GCS_GCS to enable "
+            "verification"
+        )
+        return 0
+    if args.refresh_calc:
+        ok, detail = run_gcs_convert(binary, out)
+        if not ok:
+            print(f"  · refresh-calc failed: {detail}")
+            return 1
+        print("  · calc refreshed by GCS itself; the file is now exactly what "
+              "GCS would save")
+    if args.verify:
+        ok, lines = _verify_with_gcs(out, binary)
+        for i, line in enumerate(lines):
+            print(f"  · verify: {line}" if i == 0 else f"             {line}")
+        if not ok:
+            return 1
     return 0
+
+
+def _convert_synthesized(
+    args: argparse.Namespace, actor: foundry.Actor, export: Path
+) -> int:
+    """``convert --synthesize``: a sheet from the export alone, no base."""
+    out = Path(args.output) if args.output else export.with_suffix(".gcs")
+    if out.exists() and not args.force:
+        raise ValueError(f"refusing to overwrite {out}; choose another -o, or --force")
+
+    sheet, result, outcome = synthesize.synthesize(
+        actor, include_lossy=args.include_lossy
+    )
+    for warning in result.warnings:
+        print(f"  ! {warning}")
+
+    if args.dry_run:
+        print(
+            f"Dry run: would write a new sheet with {len(outcome.added)} row(s) "
+            f"and {len(outcome.sheet_fields)} sheet field(s)."
+        )
+        print(f"Nothing written. Output would be {out}")
+        return 0
+
+    jsonio.dump(out, sheet.data)
+    print(
+        f"Wrote {out}  ({len(outcome.added)} row(s), "
+        f"{len(outcome.sheet_fields)} sheet field(s))"
+    )
+    print(
+        "  · synthesized from the export alone: modifiers, features, prereqs, "
+        "difficulty and library links are not in it to recover"
+    )
+    if outcome.skipped:
+        print(f"  · {len(outcome.skipped)} change(s) left for review")
+    if not args.refresh_calc:
+        print(
+            "  · GCS will reconcile the point total the first time it opens this; "
+            "--refresh-calc does it now"
+        )
+    return _hand_to_gcs(args, out)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -366,6 +422,15 @@ def build_parser() -> argparse.ArgumentParser:
     convert.add_argument(
         "--base",
         help="the original .gcs sheet (auto-detected from the export if omitted)",
+    )
+    convert.add_argument(
+        "--synthesize",
+        action="store_true",
+        help=(
+            "build a new sheet from the export alone, with GCS's own defaults, "
+            "instead of merging into a base. Lower fidelity: everything Foundry "
+            "never knew about is not in the export to recover"
+        ),
     )
     convert.add_argument(
         "-o",

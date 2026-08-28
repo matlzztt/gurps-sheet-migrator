@@ -352,3 +352,43 @@ def test_plan_reports_without_touching_the_sheet():
     assert len(outcome.applied) == 7
     assert [d.name for d in outcome.kept] == ["Poisons"]
     assert jsonio.dumps(sheet.data) == before, "plan() must not mutate"
+
+
+def test_a_row_added_inside_a_newly_added_container_nests_correctly():
+    """Both rows are new to the sheet, and one is inside the other.
+
+    The child can only find its parent if the parent was registered in
+    ``sheet.by_tid`` when it was created -- and only if the parent was created
+    first, which the export's depth-first order guarantees and the report's
+    alphabetical order does not. The container is named to sort last precisely
+    so that alphabetical order would fail this.
+
+    Note the container needs a valid TID of its own for the child to reference:
+    Foundry drops the link when a parent's uuid is not a TID. See the handoff.
+    """
+    import json
+
+    payload = json.loads(PLAYED.read_text("utf-8"))
+    payload["system"]["equipment"]["carried"]["09999"] = {
+        "name": "Zzz Sack",  # sorts last, so alphabetical order would break this
+        "count": "1",
+        "save": True,
+        "uuid": "EnewContainer01xy",
+        "contains": {
+            "00000": {"name": "Apple", "count": "2", "save": True, "uuid": ""},
+        },
+    }
+    actor = foundry.loads(json.dumps(payload))
+
+    sheet = gcs.load(SHEET)
+    plan = apply.apply(reconcile.reconcile(actor, sheet), sheet, now=STAMP)
+    minted = {delta.name: tid for delta, tid in plan.added}
+    assert set(minted) == {"Zzz Sack", "Apple"}
+
+    reparsed = gcs.loads(jsonio.dumps(sheet.data))
+    sack = reparsed.by_tid[minted["Zzz Sack"]]
+    assert sack.tid == "EnewContainer01xy", "a usable TID is kept, not replaced"
+    assert [c.data["description"] for c in sack.children] == ["Apple"]
+    assert reparsed.by_tid[minted["Apple"]].parent_tid == sack.tid
+    # And not also loose at the top level.
+    assert minted["Apple"] not in [row["id"] for row in reparsed.data["equipment"]]

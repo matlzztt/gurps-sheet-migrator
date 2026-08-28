@@ -112,9 +112,14 @@ Locating the base file is partly automatic:
 ### Mode B — Synthesize (fallback)
 
 Input: the Foundry export alone.
-Emit a structurally valid GCS v5 file with default settings (GCS ships defaults
-at `gcs/model/gurps/embedded_data/Standard.attr` and `Humanoid.body`), fresh
-TIDs where Foundry has none, and everything GCS derives left for GCS to compute.
+Emit a structurally valid GCS v5 file with default settings, fresh TIDs where
+Foundry has none, and everything GCS derives left for GCS to compute.
+
+**Implemented as merge against an empty sheet** (`convert --synthesize`), which
+is why it needs no separate writer. The default settings did not have to be
+transcribed from `embedded_data/Standard.attr` and `Humanoid.body` either: GCS
+handed a `{"version":5}` stub writes the whole default sheet back, and that
+output is the template.
 Useful for actors that were never in GCS (GCA imports, hand-built NPCs), and
 honest about being lower fidelity.
 

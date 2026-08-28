@@ -18,5 +18,10 @@ json2gcs = "json2gcs.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# The synthesize-mode template: GCS's own default sheet, captured from the
+# application. Not optional -- `convert --synthesize` cannot run without it.
+[tool.setuptools.package-data]
+json2gcs = ["data/*.gcs"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
