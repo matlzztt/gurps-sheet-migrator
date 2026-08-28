@@ -114,7 +114,25 @@ Every fixture has `spells: {}`. The policy entries in `fields.py` have never
 executed, and `_add_row` has a spells branch that has never run. Treat them as
 unwritten, not as working. The user has no casters, so this is correctly last.
 
-## 8.8 Smaller things
+## 8.8 The GUI is deliberately thin
+
+`gui.py` builds a command line and runs it. That is the right shape and should
+stay, but it does mean the window inherits the CLI's assumptions:
+
+- **No progress while GCS runs.** `--refresh-calc` and `--verify` shell out and
+  can take seconds; the window disables its buttons and says "Working…" but
+  cannot say more, because it is capturing a stream it only reads at the end.
+  Line-by-line streaming would need `cli` to take an output callback.
+- **No drag and drop.** Tkinter has none natively, and the export is the one
+  file a user always has in hand. `tkinterdnd2` would do it at the cost of the
+  project's first runtime dependency.
+- **The report is plain text in a Text widget.** The blocked/lossy distinction
+  that matters most is carried by indentation. Tags and colour would cost
+  little.
+- **No settings are remembered** between runs — the GCS path in particular is
+  re-detected every launch.
+
+## 8.9 Smaller things
 
 - **`plan()` and `apply()` decide the same things twice.** `plan` re-derives
   what `apply` will do, and the two have already drifted once (moves had to be
@@ -134,7 +152,7 @@ unwritten, not as working. The user has no casters, so this is correctly last.
   `points / cost_per_point` inversion inexact, so it declines. Correct and
   honest; solvable with the actual GURPS formula if it ever matters.
 
-## 8.9 Still the highest-value thing available
+## 8.10 Still the highest-value thing available
 
 Unchanged from `docs/07-handoff.md`: **use the tool on a real play session.**
 The whole suite validates against one fixture pair whose edits and assertions

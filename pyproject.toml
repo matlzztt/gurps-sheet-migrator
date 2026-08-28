@@ -11,9 +11,14 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+build = ["pyinstaller>=6.22"]
 
 [project.scripts]
 json2gcs = "json2gcs.cli:main"
+
+[project.gui-scripts]
+# The same entry point, without a console window attached on Windows.
+json2gcs-gui = "json2gcs.gui:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

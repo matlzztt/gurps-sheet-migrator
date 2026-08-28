@@ -6,6 +6,8 @@
 /dist/
 /build/
 *.spec
+# ...except our own, which is the build definition and is source.
+!/json2gcs.spec
 __pycache__/
 *.py[cod]
 .venv/

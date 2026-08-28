@@ -16,7 +16,7 @@ GCS loads and rewrites unchanged.
 JSON2GCS_GCS="C:/GOTProject/gcs/gcs.exe" python -m pytest
 ```
 
-262 pass with GCS present; 248 pass and 14 skip without it. **A green run without
+277 pass with GCS present; 263 pass and 14 skip without it. **A green run without
 that env var is not a full run** — the oracle tests skip silently.
 
 | Module | State |
@@ -31,11 +31,13 @@ that env var is not a full run** — the oracle tests skip silently.
 | `apply.py` | done |
 | `report.py` | done |
 | `synthesize.py` | done — mode B, as merge against an empty sheet |
-| `cli.py` | `inspect`, `diff`, `convert` (merge or `--synthesize`) |
+| `cli.py` | `inspect`, `diff`, `convert` (merge or `--synthesize`), `gui` |
+| `gui.py` | done — tkinter; builds a CLI argv and runs it |
 
 ## The agreed pipeline
 
-Decided with the user on 2026-08-27, in this order:
+Decided with the user on 2026-08-27, in this order. **All four are done**; what
+is left is in [`08-improvements.md`](08-improvements.md).
 
 1. ~~**Name fix.**~~ **Done 2026-08-28.** `reconcile()` takes `rename=False`;
    `_diff_profile` only proposes `profile.name` when it is set, and `diff` and
@@ -85,10 +87,36 @@ Decided with the user on 2026-08-27, in this order:
    and added rows were written in the report's alphabetical order rather than
    the export's. `RowDelta.order` records the depth-first position, which fixes
    the ordering and guarantees a container exists before its contents.
-4. **Packaging.** `pyinstaller --onefile`, then a GUI. The stated end goal is
-   "a few clicks". Note that `src/json2gcs/data/default.gcs` is package data,
-   not optional — `--synthesize` cannot run without it, so the spec file needs
-   it bundled.
+4. ~~**Packaging.**~~ **Done 2026-08-28.** `json2gcs.spec` builds one
+   self-contained 13 MB `json2gcs.exe`:
+
+   ```bash
+   python -m pip install -e ".[build]"
+   python -m PyInstaller --distpath build/dist json2gcs.spec
+   ```
+
+   Run it with no arguments and the window opens; run it with arguments and it
+   is the CLI, byte-for-byte the same output (checked against the library's).
+
+   `gui.py` reimplements nothing — it assembles the argv the command line
+   takes and calls `cli.main`, capturing stdout. So every rule about what may
+   be written stays in one place, and the window shows the same report the
+   terminal does. The parts that decide anything (`build_argv`, `suggest`) are
+   pure functions, tested without ever constructing a `tk.Tk`.
+
+   Three packaging traps, all of which bit:
+
+   * **`data/default.gcs` must be bundled explicitly.** A plain `--onefile`
+     leaves it out and `--synthesize` then fails at run time, not build time.
+   * **`__main__.py` cannot use a relative import.** PyInstaller runs it as a
+     top-level script with no package context, so `from .cli import main`
+     builds cleanly and dies on launch with "attempted relative import with no
+     known parent package". Use `from json2gcs.cli import main`.
+   * **`gui` needs a `hiddenimports` entry**, because `cmd_gui` imports it
+     late (deliberately — the CLI should never need tk).
+
+   `tests/test_gui.py` pins all three, so they cannot regress silently between
+   builds. Note `.gitignore` has `*.spec`; `!/json2gcs.spec` exempts ours.
 
 **Spells were explicitly deprioritised.** The user has no casters, every fixture
 has `spells: {}`, and the policy entries in `fields.py` have never executed.

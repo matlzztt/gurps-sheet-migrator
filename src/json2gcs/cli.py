@@ -485,6 +485,9 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     convert.set_defaults(func=cmd_convert)
+
+    window = sub.add_parser("gui", help="open the window (the default when run with no arguments)")
+    window.set_defaults(func=cmd_gui)
     return parser
 
 
@@ -503,8 +506,18 @@ def _use_utf8_output() -> None:
                 pass
 
 
+def cmd_gui(args: argparse.Namespace) -> int:
+    """Open the tkinter front end. Imported here so the CLI never needs tk."""
+    from . import gui
+
+    return gui.main()
+
+
 def main(argv: list[str] | None = None) -> int:
     _use_utf8_output()
+    if argv is None and len(sys.argv) == 1:
+        # Double-clicked, rather than run from a shell: show the window.
+        argv = ["gui"]
     args = build_parser().parse_args(argv)
     try:
         return args.func(args)

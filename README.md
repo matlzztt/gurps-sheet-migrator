@@ -17,6 +17,18 @@ and is not on `PATH`).
 python -m pip install -e ".[dev]"
 ```
 
+**Just want to use it?** Run the executable with no arguments and a window
+opens: choose the Foundry export, and it finds the sheet, picks the mode and
+fills in the output path. Preview shows the report; Convert writes the file.
+
+```bash
+python -m pip install -e ".[build]"
+python -m PyInstaller --distpath build/dist json2gcs.spec
+```
+
+That produces one self-contained `build/dist/json2gcs.exe` (~13 MB) needing no
+Python. Run it with arguments and it is the command line below, unchanged.
+
 ```bash
 json2gcs convert actor.json --base character.gcs
 ```
@@ -153,7 +165,11 @@ src/json2gcs/
   synthesize.py          mode B: a new sheet from the export alone
   report.py              renders a reconciliation as readable text
   cli.py                 command line entry point
-tests/                   pytest suite (262 tests)
+  gui.py                 tkinter window; builds a command line and runs it
+  __main__.py            entry point for `python -m` and the packaged .exe
+  data/default.gcs       GCS's own empty sheet, the synthesize template
+json2gcs.spec            PyInstaller build definition
+tests/                   pytest suite (277 tests)
 docs/                    the Phase 1 analysis
 samples/sturm/           the regression fixture — one character, both formats
 samples/container/       container + known-changelog fixture set
