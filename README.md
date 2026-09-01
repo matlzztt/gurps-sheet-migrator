@@ -222,3 +222,28 @@ commands there if you need them.
   indentation compounds on every save cycle (0 → 8 → 44 spaces), `equipped`
   cascades through containers, and a rename lands in `name` while
   `originalName` stays put. See `docs/05-fidelity.md` §5.7.
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** — see
+[`LICENSE`](LICENSE).
+
+Three files in this repository came from elsewhere and keep their own terms:
+
+| File | Origin | License |
+|---|---|---|
+| `samples/upstream/issue767.gcs` | [GCS](https://github.com/richardwilkes/gcs) test data | MPL-2.0 |
+| `samples/upstream/container_with_own_data.eqp` | GCS test data | MPL-2.0 |
+| `src/json2gcs/data/default.gcs` | GCS's own default sheet, captured from the application | MPL-2.0 |
+
+MPL-2.0 is file-level copyleft: those three files stay under MPL-2.0 wherever
+they go, and §3.3 is what permits shipping them inside a GPL-3.0 larger work.
+Modify one of them and the modification is MPL-2.0 too — the rest of the tree
+is unaffected.
+
+Nothing is copied from [GGA](https://github.com/crnormand/gurps) (MIT); it was
+read to write `docs/03-foundry-format.md` and nothing more. Both upstreams are
+pinned by commit in [`docs/00-provenance.md`](docs/00-provenance.md).
+
+GURPS is a trademark of Steve Jackson Games. This project is an unofficial fan
+tool, is not affiliated with or endorsed by SJG, and contains no game text.
