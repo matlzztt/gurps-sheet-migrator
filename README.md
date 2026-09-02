@@ -22,6 +22,7 @@ silently overwritten.
 - [Testing](#testing)
 - [Project layout](#project-layout)
 - [Documentation](#documentation)
+- [Changelog](#changelog)
 - [Key findings so far](#key-findings-so-far)
 - [License](#license)
 
@@ -300,6 +301,7 @@ src/json2gcs/
   __main__.py            entry point for `python -m` and the packaged .exe
   data/default.gcs       GCS's own empty sheet, the synthesize template
 json2gcs.spec            PyInstaller build definition
+CHANGELOG.md             release history and known limitations
 tests/                   pytest suite (328 tests)
 docs/                    the design record — see Documentation below
 samples/sturm/           the regression fixture — one character, both formats
@@ -334,6 +336,11 @@ Environment facts worth knowing up front: **GCS is not assumed to be on
 `PATH`** (pass `--gcs` or set `JSON2GCS_GCS`), and if you're working with the
 upstream clones under `core.autocrlf=true`, take fixtures from the git blob
 rather than the working tree — see `docs/07-handoff.md` for why.
+
+## Changelog
+
+Release history, and the known limitations each release ships with, are in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Key findings so far
 

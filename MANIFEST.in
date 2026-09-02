@@ -1,0 +1,6 @@
+# README and LICENSE come in automatically via `readme` and `license-files`.
+# These do not, and an sdist without them loses the release history and the
+# entire design record.
+include CHANGELOG.md
+include json2gcs.spec
+recursive-include docs *.md

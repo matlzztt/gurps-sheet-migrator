@@ -16,7 +16,7 @@ GCS loads and rewrites unchanged.
 JSON2GCS_GCS="C:/GOTProject/gcs/gcs.exe" python -m pytest
 ```
 
-291 pass with GCS present; 269 pass and 22 skip without it. **A green run without
+328 pass with GCS present; 306 pass and 22 skip without it. **A green run without
 that env var is not a full run** — the oracle tests skip silently.
 
 | Module | State |

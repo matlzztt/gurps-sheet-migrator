@@ -1,0 +1,87 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    # Both platforms matter: the packaged artifact is a Windows .exe, but the
+    # library itself is pure Python and should not quietly grow a dependency
+    # on Windows path or newline behaviour.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+
+      # gui.py imports tkinter at module scope, so test_gui.py needs it to be
+      # importable. It never constructs a Tk(), so no display is required.
+      - name: Check tkinter is importable
+        run: python -c "import tkinter; print(tkinter.TkVersion)"
+
+      # GCS is not installable on a runner, so the 22 oracle tests skip here.
+      # A green CI run is therefore the 306-test run, NOT the full 328 — the
+      # oracle tests can only be run locally with JSON2GCS_GCS set.
+      # See docs/07-handoff.md.
+      - name: Test
+        run: python -m pytest -q
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: python -m pip install pyflakes
+
+      - name: Pyflakes
+        run: python -m pyflakes src/json2gcs tests
+
+  build:
+    # Proves the sdist and wheel still build and that the synthesize template
+    # is actually inside the wheel -- omitting it is a silent, run-time-only
+    # failure (docs/07-handoff.md, packaging traps).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install build twine
+          python -m build
+
+      - name: Check metadata renders on PyPI
+        run: python -m twine check dist/*
+
+      - name: The wheel must contain data/default.gcs
+        run: python -m zipfile --list dist/*.whl | grep -q 'json2gcs/data/default.gcs'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
