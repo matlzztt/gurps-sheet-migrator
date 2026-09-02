@@ -221,3 +221,61 @@ were chosen by the same author. An attribute *point* change, a skill raised
 with earned points, and a row genuinely added through the Foundry UI have none
 of them ever been seen. Everything in this file is a known unknown; a real
 session is where the unknown unknowns are.
+
+## 8.11 Fill gaps from the GCS Master Library
+
+Validated on 2026-09-02 against the library installed at `~/GCS/Master Library`
+(43 `.skl` files, 2,005 name+specialization keys; 82 `.adq`; 3,329 equipment
+rows carrying structured `weapons[]`).
+
+Every row GCS takes from the library keeps a `source` pointer back to it. That
+pointer does not survive into a Foundry export — but the *name* does, and since
+§8.2 the name arrives decomposed. Looking a skill up by name recovers what the
+export cannot carry.
+
+**Measured, on the container fixture's 22 non-technique skills:**
+
+| | |
+|---|---|
+| resolved against the library | 22 / 22 |
+| difficulty matching the real sheet | **22 / 22** |
+| wrong answers | 0 |
+| rows it would actually fix | **16** |
+
+`Surgery` `iq/e` → `iq/vh`; `Poisons` → `iq/h`; `Naturalist` → `iq/h`. These are
+the rows `docs/05-fidelity.md` lists as unrecoverable.
+
+**Match on name only, not name+specialization.** Doing both resolved just 13 of
+22, missing `Religious Ritual (Turchin)`, `Theology (Turchin)`,
+`Esoteric Medicine (Menkhu)` — campaign specializations that are not in any
+book, and never will be. Name-only is not a loosening: **difficulty is a
+property of the skill, not the specialization**, which is exactly why GURPS
+writes "Religious Ritual (specific religion)". Two skills (`Tracking`,
+`Stealth`) had conflicting difficulties across books and were resolved by
+preferring Basic Set; that needs a real policy rather than a lucky default.
+
+Also available: `defaults[]`, `tags`, `features`, `prereqs`, `points_per_level`,
+`round_down`, the `source` block itself (restoring GCS's sync-to-library link),
+and structured weapon `damage` — which is §8.5's "unrecoverable". 741 library
+traits carry `@Nameable@` templates, so matching one against a resolved name
+(`@Type@ Rank` vs `Religious Rank`) would recover both the template *and* the
+`replacements` map that `docs/05-fidelity.md` §5.2 calls destroyed.
+
+**The hazard, and it is the important part.** This is *inference*. Today a
+missing field is visibly missing; library-filled, it becomes a plausible value
+that is wrong whenever the player customized that row — and wrong invisibly.
+That trades an honest loss for a silent one, which is the failure mode §6.5
+exists to prevent. The discipline: only fill fields that would otherwise be
+omitted entirely, never overwrite anything the export supplied, mark every
+library-sourced value, and report it. `Fidelity` and `--include-lossy` are
+already exactly this distinction.
+
+**Ordering.** This ranks *behind* the snapshot store (`docs/06-architecture.md`
+§6.9), which answers the same questions by deduction rather than inference. The
+library's place is the residue the store cannot cover by definition: rows added
+inside Foundry (§8.6) and characters that never had a `.gcs`. Traits matched
+only 5 of 23 on exact name, so trait lookup needs the template matching above
+before it is worth much; skills are the ready win.
+
+Not vendorable — it is ~125 files of licensed content on the user's disk. It
+would be an optional `--library PATH`, discovered the way `--gcs` is.

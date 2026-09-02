@@ -254,3 +254,81 @@ is locked in `tests/test_apply.py`.
 Steps 1–3 are worth having before any mapping work, because a correct
 byte-identical writer plus an honest report is already a usable tool: it tells the
 user exactly what changed in play, even before it can apply the changes.
+
+## 6.9 The snapshot store — turning inference into deduction
+
+Proposed 2026-09-02, phase 0 built. Everything below applies to **merge mode**;
+mode B is what it makes rare.
+
+### The problem it solves
+
+`--base current.gcs` is a **two-way** merge, and it silently assumes the sheet
+is still what Foundry imported. When it is not, the failure is invisible: every
+field the player did not touch reads as "unchanged" against a *stale* export,
+so an edit made in GCS after the export gets reverted by a value nobody typed.
+Nothing in the report can show this, because from a two-way comparison it is
+indistinguishable from a real match.
+
+The fix is the one every version-control system uses: keep the **common
+ancestor**. A copy of the sheet as it was when Foundry imported from it turns a
+two-way merge into a three-way one, and "the player changed it", "the GM changed
+it" and "both changed it" stop being the same observation.
+
+The same store answers a second question — *where is the base?* — because the
+export carries the row TIDs, and a TID is an identity, not a name. Matching by
+it is deduction. This is the whole reason to prefer a store over the GCS Master
+Library (`docs/08-improvements.md`): the library can only ever tell us what the
+*canonical* version of a row looks like, while the store knows what **this
+character's** row actually was, homebrew and player customizations included.
+
+### What the export gives us to work with
+
+Measured on `samples/container/`:
+
+| | |
+|---|---|
+| `system.additionalresources.importname` | `"container.gcs"` — names the source sheet |
+| `system.lastImport` | `"Aug 27 2026 14:13:00"` — when Foundry imported |
+| row TIDs resolving against the sheet | **77 of 77** |
+
+`lastImport` is written by `actor-importer.js` as
+`new Date().toString().split(' ').splice(1, 4).join(' ')` — JavaScript's fixed
+date format with the weekday and the zone stripped. The format is
+locale-independent by specification, so parsing it is safe; what it loses is the
+offset, leaving browser-local time.
+
+### Phases
+
+**Phase 0 — say when the ancestor is missing. Built.**
+`reconcile._import_is_stale` compares the sheet's `modified_date` against
+`lastImport` and warns when the sheet is the newer of the two. It needs no
+store at all, and it converts the silent failure above into a visible one. It
+reports both timestamps rather than asserting a verdict, because the comparison
+is exact only when both were written on the same machine — `lastImport` has no
+zone to compare against. Guarded on `sheet.by_tid` being non-empty, so mode B,
+which merges against a freshly stamped empty sheet, never trips it.
+
+**Phase 1 — remember.** `json2gcs remember <sheet.gcs>`, plus an automatic
+remember on every `convert --base`. Store the **whole file bytes**, not an
+extraction: they are 20–100 KB, it is lossless by construction, and this project
+already treats the byte stream as the contract (§6.5). Index row TID → snapshot,
+so lookup never depends on a filename. Seeding is retroactive — any `.gcs` still
+on disk can be remembered now, and every later export from it is covered.
+
+**Phase 2 — find the base.** `convert export.json` with no `--base` looks its
+own row TIDs up in the store. Mode B stops being the fallback for "I don't have
+the sheet handy" and becomes what it should be: the mode for characters that
+genuinely never had one.
+
+**Phase 3 — three-way reconcile.** Snapshot as ancestor, current sheet as
+theirs, export as ours. A field that changed on one side only is applied; a
+field that changed on both is a **conflict** and gets reported instead of
+silently resolved in Foundry's favour, which is what happens today.
+
+### What it does not cover
+
+Rows added inside Foundry have no TID and therefore no snapshot entry
+(`docs/08-improvements.md` §8.6), and a character with no GCS origin has no
+snapshot at all. Those are exactly the cases the Master Library idea addresses,
+so the two compose rather than compete — **snapshot first (deduction), library
+second (inference, marked as such), honest omission third.**

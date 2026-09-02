@@ -19,6 +19,7 @@ independent edits would be technically true and practically useless.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Iterable
@@ -447,6 +448,50 @@ def _diff_attributes(actor: foundry.Actor, sheet: gcs.Sheet) -> list[Change]:
     return changes
 
 
+#: How GGA writes ``system.lastImport``. ``actor-importer.js`` builds it as
+#: ``new Date().toString().split(' ').splice(1, 4).join(' ')`` — the weekday and
+#: the zone stripped off JavaScript's fixed date format. That format is
+#: locale-independent by specification, so parsing it is safe; what it loses is
+#: the offset, leaving browser-local time.
+_LAST_IMPORT = "%b %d %Y %H:%M:%S"
+
+
+def _import_is_stale(actor: foundry.Actor, sheet: gcs.Sheet) -> str:
+    """Warn when the base sheet was edited after Foundry imported from it.
+
+    Merging with ``--base`` is a two-way comparison, and it quietly assumes the
+    sheet is still what Foundry imported.  When it is not, every field the
+    player did not touch still reads as "unchanged" against a *stale* export,
+    so edits made in GCS since the import can be reverted by values nobody
+    typed — a lost update with nothing to show for it in the report.
+
+    This cannot be proved from the two timestamps: ``lastImport`` carries no
+    zone and ``modified_date`` does, so the comparison is exact only when both
+    were written on the same machine.  It therefore reports both times and
+    lets the reader judge, rather than asserting a verdict.
+    """
+    if not sheet.by_tid:
+        return ""  # synthesize mode merges against an empty sheet; nothing to lose
+    stamp = (actor.last_import or "").strip()
+    modified = str(sheet.data.get("modified_date") or "").strip()
+    if not stamp or not modified:
+        return ""
+    try:
+        imported = datetime.strptime(stamp, _LAST_IMPORT)
+        edited = datetime.fromisoformat(modified).replace(tzinfo=None)
+    except ValueError:
+        return ""  # an unexpected format is not evidence of anything
+    if edited <= imported:
+        return ""
+    return (
+        f"the base sheet was last written {modified}, after Foundry imported it "
+        f"({stamp}). The export is older than the sheet, so anything changed in "
+        "GCS since the import can be reverted by values the player never "
+        "touched. Read the report before writing, or merge against the sheet as "
+        "it was at import time."
+    )
+
+
 def _diff_points(actor: foundry.Actor, sheet: gcs.Sheet) -> list[Change]:
     total = (actor.system.get("totalpoints") or {}).get("total")
     if total is None:
@@ -530,6 +575,9 @@ def reconcile(
     result = Reconciliation()
     result.warnings.extend(actor.warnings)
     result.warnings.extend(sheet.warnings)
+    stale = _import_is_stale(actor, sheet)
+    if stale:
+        result.warnings.append(stale)
 
     deltas: dict[str, RowDelta] = {}
 

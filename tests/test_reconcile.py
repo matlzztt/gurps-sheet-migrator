@@ -251,3 +251,57 @@ def test_report_summarises_long_text_edits(played):
 def test_report_handles_an_empty_reconciliation():
     text = report.render(reconcile.Reconciliation())
     assert "No differences" in text
+
+
+# --------------------------------------------------------------------------
+# the sheet moving on without the export
+# --------------------------------------------------------------------------
+
+
+def _with_modified(base: gcs.Sheet, when: str) -> gcs.Sheet:
+    """The same sheet, claiming it was last written at ``when``."""
+    copy = gcs.load(DIR / "container.gcs")
+    copy.data["modified_date"] = when
+    return copy
+
+
+def test_a_sheet_edited_after_the_import_is_flagged(sheet):
+    """A two-way merge cannot see this, so it has to be said out loud: the
+    export predates the sheet, and applying it reverts whatever GCS changed."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    assert actor.last_import == "Aug 27 2026 14:13:00"
+
+    later = _with_modified(sheet, "2026-08-29T09:00:00-03:00")
+    warnings = reconcile.reconcile(actor, later).warnings
+    assert any("after Foundry imported it" in w for w in warnings)
+    assert any("2026-08-29T09:00:00-03:00" in w and "Aug 27 2026" in w for w in warnings), (
+        "the warning must show both timestamps; the comparison is not exact "
+        "enough to assert a verdict on its own"
+    )
+
+
+def test_the_real_fixture_is_not_flagged(played):
+    """container.gcs was written at 14:10 and imported at 14:13 — three
+    minutes, and nothing touched in between."""
+    assert not any("after Foundry imported it" in w for w in played.warnings)
+
+
+def test_an_unreadable_timestamp_is_not_evidence(sheet):
+    """GGA's format is fixed, but a hand-edited or future export must degrade
+    to silence rather than to a false accusation."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    actor.system["lastImport"] = "sometime last Tuesday"
+    later = _with_modified(sheet, "2026-08-29T09:00:00-03:00")
+    assert not any(
+        "after Foundry imported it" in w
+        for w in reconcile.reconcile(actor, later).warnings
+    )
+
+
+def test_synthesize_is_never_flagged():
+    """Mode B merges against an empty sheet stamped 'now', which would
+    otherwise trip the check on every single run."""
+    from json2gcs import synthesize  # noqa: PLC0415
+
+    _, result, _ = synthesize.synthesize(foundry.load(DIR / "container.foundry.json"))
+    assert not any("after Foundry imported it" in w for w in result.warnings)
