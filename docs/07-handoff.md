@@ -4,7 +4,7 @@ Read [`README.md`](../README.md) first for what the project is. This file is the
 working state: what is done, what is next, and the things that cost time to
 learn and would cost it again.
 
-Last updated: 2026-08-28.
+Last updated: 2026-09-02.
 
 ## Where the project stands
 
@@ -16,7 +16,7 @@ GCS loads and rewrites unchanged.
 JSON2GCS_GCS="C:/GOTProject/gcs/gcs.exe" python -m pytest
 ```
 
-277 pass with GCS present; 263 pass and 14 skip without it. **A green run without
+291 pass with GCS present; 269 pass and 22 skip without it. **A green run without
 that env var is not a full run** — the oracle tests skip silently.
 
 | Module | State |
@@ -125,12 +125,13 @@ Treat them as unwritten code, not as working code.
 ## What to improve next
 
 [`08-improvements.md`](08-improvements.md) is the backlog: every known gap, how
-it was found, and what fixing it takes. The two with the most value per line
-changed are **driving `apply._add_row` from `fields.RULES`** (synthesize mode
-currently drops every item's weight, value, legality class, tech level and uses
-— the policy already knows how to read all of them) and **decomposing the
-names GGA composes** (`"Survival (Swampland)"` should be a name plus a
-specialization).
+it was found, and what fixing it takes. §8.1 (driving `apply._add_row` from
+`fields.RULES`) and §8.2 (decomposing the names GGA composes, for traits and
+skills) are done as of 2026-09-02. §8.4 turned up two real, unrelated findings
+along the way — `_strip_calc` was missing `defaulted_from`, and three of the
+user's own characters carry an invalid entity id that GCS silently remints —
+both are written up there. Techniques (§8.3) are still the next composed-name
+gap, and spells remain untouched (§8.7).
 
 ## What would actually de-risk this
 

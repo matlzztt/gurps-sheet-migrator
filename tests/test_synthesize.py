@@ -217,6 +217,62 @@ def test_a_skill_carries_the_controlling_attribute_it_does_have(built):
     assert skill["difficulty"] == "iq/e"
 
 
+def test_equipment_carries_the_fields_the_policy_knows(built):
+    """apply._add_row is driven by fields.RULES, so TL/value/weight -- which
+    merge mode has always written -- must reach a synthesized sheet too."""
+    sheet, _, _ = built
+    knife = next(e for e in sheet.data["equipment"] if e["description"] == "Large Knife")
+    assert knife["tech_level"] == "0"
+    assert str(knife["base_value"]) == "40"
+    assert str(knife["base_weight"]) == "1"
+
+
+def test_equipment_legality_class_is_not_written_when_it_is_ggas_default(built):
+    """GGA defaults an absent LC to '4'; every item in this fixture has that
+    value, so none of it is real data worth writing."""
+    sheet, _, _ = built
+    assert not any(
+        "legality_class" in row for row in flatten(sheet.data["equipment"])
+    )
+
+
+def test_a_leveled_trait_gets_can_level_too(built):
+    """trait.go forces can_level=true on load whenever levels != 0; omitting
+    it here just means GCS's rewrite disagrees with what we wrote."""
+    sheet, _, _ = built
+    trait = next(
+        t for t in flatten(sheet.data["traits"]) if t["name"] == "Good Reputation"
+    )
+    assert trait["levels"] == 3
+    assert trait["can_level"] is True
+
+
+def test_a_traits_level_decoration_is_stripped_from_the_name(built):
+    """originalName has no level suffix; name does. Writing the decorated
+    string into GCS's name field would duplicate what 'levels' already says."""
+    sheet, _, _ = built
+    names = [t["name"] for t in flatten(sheet.data["traits"])]
+    assert "Bad Reputation" in names
+    assert "Bad Reputation 3" not in names
+
+
+def test_a_skills_specialization_is_decomposed(built):
+    """'Esoteric Medicine (Menkhu)' -> name + specialization, not one string
+    GCS would treat as an unrecognized skill name (docs/08-improvements 8.2)."""
+    sheet, _, _ = built
+    skill = next(s for s in sheet.data["skills"] if s["name"] == "Esoteric Medicine")
+    assert skill["specialization"] == "Menkhu"
+
+
+def test_a_technique_name_is_left_alone(built):
+    """Techniques are lossy for a separate, already-known reason (8.3); this
+    decomposition must not also mangle them further."""
+    sheet, _, _ = built
+    technique = next(s for s in sheet.data["skills"] if s["id"].startswith("q"))
+    assert "specialization" not in technique
+    assert "(" in technique["name"]
+
+
 def test_row_keys_are_in_canonical_order(built):
     sheet, _, _ = built
     for section in gcs.SECTIONS:

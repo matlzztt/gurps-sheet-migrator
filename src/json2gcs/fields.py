@@ -20,7 +20,15 @@ from typing import Any, Callable
 
 from .jsonio import Num
 
-__all__ = ["Fidelity", "Compare", "Rule", "RULES", "expected_display_name", "values_equal"]
+__all__ = [
+    "Fidelity",
+    "Compare",
+    "Rule",
+    "RULES",
+    "expected_display_name",
+    "decompose_skill_name",
+    "values_equal",
+]
 
 
 class Fidelity(Enum):
@@ -208,6 +216,35 @@ def expected_display_name(row, base: dict) -> str:
         if levels:
             return f"{original} {int(Decimal(str(levels)))}"
     return original
+
+
+_SKILL_SPEC = re.compile(r"^(.+) \(([^()]+)\)$")
+_SKILL_TL = re.compile(r"^(.+)/TL(.+)$")
+
+
+def decompose_skill_name(composed: str) -> tuple[str, str, str]:
+    """Split a skill's Foundry name back into ``(name, specialization, tech_level)``.
+
+    ``importSk`` composes Foundry's ``name`` from GCS's own fields:
+    ``` `${name}${tech_level ? '/TL'+tl : ''}${spec ? ' ('+spec+')' : ''}` ```
+    (docs/04-mapping.md 4.5). Strip the specialization group first, then the
+    ``/TL`` suffix, since that is the order they were appended in. Matches the
+    pattern explicitly rather than guessing — the same rule §4.9 gives for
+    telling decoration from a rename.
+
+    Not used for techniques: GGA mangles their name with a second,
+    differently-shaped parenthesized group (docs/08-improvements.md 8.3).
+    """
+    name = composed
+    spec = ""
+    tech_level = ""
+    match = _SKILL_SPEC.match(name)
+    if match:
+        name, spec = match.group(1), match.group(2)
+    match = _SKILL_TL.match(name)
+    if match:
+        name, tech_level = match.group(1), match.group(2)
+    return name, spec, tech_level
 
 
 # --------------------------------------------------------------------------

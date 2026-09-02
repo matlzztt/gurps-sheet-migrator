@@ -26,10 +26,16 @@ needs_gcs = pytest.mark.skipif(
     BINARY is None, reason="GCS not installed; set JSON2GCS_GCS to enable"
 )
 
+CHARACTERS = REPO / "samples" / "characters"
+
 FIXTURES = [
     REPO / "samples" / "sturm" / "sturm.gcs",
     DIR / "container.gcs",
     REPO / "samples" / "upstream" / "issue767.gcs",
+    CHARACTERS / "Alys Dustin.gcs",
+    CHARACTERS / "Sharpbend.gcs",
+    CHARACTERS / "Surubash.gcs",
+    CHARACTERS / "Suruchin.gcs",
 ]
 
 
@@ -65,11 +71,18 @@ def test_gcs_rewrites_the_fixtures_unchanged_apart_from_calc(path: Path, tmp_pat
 @needs_gcs
 @pytest.mark.parametrize(
     "path",
-    [REPO / "samples" / "sturm" / "sturm.gcs", DIR / "container.gcs"],
+    [
+        REPO / "samples" / "sturm" / "sturm.gcs",
+        DIR / "container.gcs",
+        CHARACTERS / "Alys Dustin.gcs",
+        CHARACTERS / "Sharpbend.gcs",
+        CHARACTERS / "Surubash.gcs",
+        CHARACTERS / "Suruchin.gcs",
+    ],
     ids=lambda p: p.name,
 )
 def test_our_own_fixtures_are_exact_fixed_points(path: Path, tmp_path: Path):
-    """Byte-for-byte, for the two sheets we captured ourselves."""
+    """Byte-for-byte, for the sheets we captured ourselves."""
     assert _gcs_rewrite(path, tmp_path) == path.read_bytes()
 
 

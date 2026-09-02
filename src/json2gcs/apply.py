@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
+from . import fields as policy
 from . import gcs, schema
 from . import tid as tidmod
 from .jsonio import Num
@@ -415,6 +416,12 @@ DEFAULT_DIFFICULTY = "e"
 TECHNIQUE_DIFFICULTY = "a"
 
 
+def _is_technique(row) -> bool:
+    return row.data.get("type") == "TECHNIQUE" or (
+        bool(row.tid) and row.tid[0] == tidmod.Kind.TECHNIQUE
+    )
+
+
 def _skill_difficulty(row) -> str:
     """``"iq/e"`` — the controlling attribute from the export, GCS's default letter.
 
@@ -426,9 +433,7 @@ def _skill_difficulty(row) -> str:
     the choice is between GCS's default with the attribute and GCS's default
     without it.
     """
-    if row.data.get("type") == "TECHNIQUE" or (
-        row.tid and row.tid[0] == tidmod.Kind.TECHNIQUE
-    ):
+    if _is_technique(row):
         return TECHNIQUE_DIFFICULTY
     relative = str(row.data.get("relativelevel") or "").strip()
     attribute = ""
@@ -441,11 +446,42 @@ def _skill_difficulty(row) -> str:
     return f"{attribute.lower()}/{DEFAULT_DIFFICULTY}"
 
 
-def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
-    """Create a minimal GCS row for something the base sheet does not have.
+def _skill_name_fields(row) -> tuple[str, str, str]:
+    """``(name, specialization, tech_level)`` for a skill row.
 
-    The result is deliberately sparse.  Only what Foundry actually holds is
-    written; GCS fills in the rest and the player can finish the row there.
+    Decomposes Foundry's composed name (docs/08-improvements.md 8.2) when the
+    row was not renamed in Foundry — ``originalName`` is the same composed
+    string GGA wrote at import, so a match means nothing changed and it is
+    safe to split. A technique's name is mangled by a separate GGA bug (8.3)
+    and is not decomposed; nor is a genuine rename, which need not follow the
+    composition pattern at all.
+    """
+    if _is_technique(row) or row.display_name != row.gcs_name:
+        return row.display_name, "", ""
+    return policy.decompose_skill_name(row.gcs_name)
+
+
+def _trait_name(row) -> str:
+    """The name to write, with any level decoration stripped back out.
+
+    ``originalName`` already lacks the level suffix GGA appends to ``name``
+    (docs/04-mapping.md 4.4), so reuse the field policy's own rename check —
+    :func:`fields._read_name` — rather than re-deriving it: a fabricated base
+    row carrying the real level and the undecorated name gets the same
+    rename-vs-decoration answer merge mode would give.
+    """
+    return policy._read_name(row, {"levels": row.data.get("level"), "name": row.gcs_name})
+
+
+def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
+    """Create a GCS row for something the base sheet does not have.
+
+    Every field :data:`fields.RULES` knows how to read for this section is
+    written from it, the same policy merge mode uses.  Only what the policy
+    does not cover is handled directly here: the minted id, the name (its
+    policy rule needs a base row to detect a rename against, and there isn't
+    one), the difficulty guess, and traits' ``points`` -> ``base_points``
+    rename.
     """
     row = delta.row
     if row is None:
@@ -456,35 +492,61 @@ def _add_row(data: dict, sheet, delta: RowDelta) -> str | None:
         return None
 
     fresh: dict[str, Any] = {"id": minted}
+    is_container = bool(row.children)
 
-    if section in ("equipment", "other_equipment"):
-        fresh["description"] = row.display_name
-        quantity = row.data.get("count")
-        fresh["quantity"] = Num(str(quantity)) if quantity not in (None, "") else Num("1")
-        if row.data.get("equipped"):
-            fresh["equipped"] = True
-    elif section == "notes":
+    if section == "notes":
         fresh["markdown"] = row.data.get("notes") or ""
+        if row.data.get("pageref"):
+            fresh["reference"] = row.data["pageref"]
     else:
-        fresh["name"] = row.display_name
-        if section == "skills" and not row.children:
+        if section in ("equipment", "other_equipment"):
+            fresh["description"] = row.display_name
+            quantity = row.data.get("count")
+            fresh["quantity"] = (
+                Num(str(quantity)) if quantity not in (None, "") else Num("1")
+            )
+        elif section == "traits":
+            fresh["name"] = _trait_name(row)
+        elif section == "skills" and not is_container:
+            name, specialization, tech_level = _skill_name_fields(row)
+            fresh["name"] = name
+            if specialization:
+                fresh["specialization"] = specialization
+            if tech_level:
+                fresh["tech_level"] = tech_level
             difficulty = _skill_difficulty(row)
             if difficulty:
                 fresh["difficulty"] = difficulty
-        points = row.data.get("points")
-        # Traits spell it 'base_points'; skills and spells spell it 'points'.
-        # GCS silently discards the wrong one, so this is not cosmetic. A
-        # container has no points of its own -- GCS sums its children.
-        if points not in (None, "") and not row.children:
-            key = "base_points" if section == "traits" else "points"
-            value = Num(str(points))
-            if not schema.is_zero(value):
-                fresh[key] = value
+        else:
+            fresh["name"] = row.display_name
 
-    if row.data.get("notes") and section != "notes":
-        fresh["local_notes"] = row.data["notes"]
-    if row.data.get("pageref"):
-        fresh["reference"] = row.data["pageref"]
+        for rule in policy.RULES.get(section, ()):
+            if rule.gcs in ("name", "description", "quantity"):
+                continue  # written above: no base row to rename or default against
+            if rule.gcs == "points" and is_container:
+                continue  # a container's total comes from its children
+            value = rule.read(row, {})
+            if rule.gga_default is not policy._MISSING and policy.values_equal(
+                value, rule.gga_default, rule.compare
+            ):
+                continue  # equals what GGA fabricates, not necessarily real data
+            if schema.is_zero(value):
+                continue
+            fresh[rule.gcs] = value
+
+        # Traits spell it 'base_points'; the policy's table doesn't cover this
+        # rename, and GCS silently discards the wrong key rather than erroring.
+        if section == "traits" and not is_container:
+            points = row.data.get("points")
+            if points not in (None, ""):
+                value = Num(str(points))
+                if not schema.is_zero(value):
+                    fresh["base_points"] = value
+            if not schema.is_zero(fresh.get("levels")):
+                # trait.go forces this on load whenever a non-container trait
+                # has nonzero levels; writing levels without it just means GCS
+                # adds it back and disagrees with our output.
+                fresh["can_level"] = True
 
     reordered = sorted(fresh.items(), key=lambda kv: schema.order_key(section, kv[0]))
     fresh = dict(reordered)

@@ -201,10 +201,19 @@ def run_gcs_convert(binary: Path, target: Path) -> tuple[bool, str]:
     return True, (done.stdout or "").strip()
 
 
+#: Keys GCS recomputes on load and writes back, the same way it does ``calc``.
+#: ``defaulted_from`` is a skill's cached best default, written to disk from a
+#: script evaluation (gcs/model/gurps/skill.go, entity.go 206) rather than
+#: read back as input — comparing it would flag a real fixture's own file as
+#: a writer bug for something json2gcs never touches (docs/04-mapping.md 4.5
+#: lists it ❌, unrecoverable).
+_DERIVED_KEYS = frozenset({"calc", "defaulted_from"})
+
+
 def _strip_calc(value):
-    """Drop every ``calc`` block, which GCS recomputes on load."""
+    """Drop every ``calc`` block and other GCS-recomputed-on-load keys."""
     if isinstance(value, dict):
-        return {k: _strip_calc(v) for k, v in value.items() if k != "calc"}
+        return {k: _strip_calc(v) for k, v in value.items() if k not in _DERIVED_KEYS}
     if isinstance(value, list):
         return [_strip_calc(v) for v in value]
     return value

@@ -7,48 +7,45 @@ Nothing here is a known *defect* in shipped behaviour: the suite is green and
 GCS accepts both modes' output. These are places where the tool does less than
 it could, or knows less than it should.
 
-Last updated: 2026-08-28.
+Last updated: 2026-09-02.
 
 ## 8.1 Drive `_add_row` from the field policy — the one big one
 
-`fields.RULES` already encodes the whole Foundry→GCS field mapping, per
-section, as data. `apply._add_row` ignores it and hand-writes a much smaller
-subset. They have diverged:
+**Done 2026-09-02.** `apply._add_row` now iterates `fields.RULES[section]` for
+everything but `id`, `name`/`description` (the rule needs a base row to detect
+a rename against, and a fresh row has none), `quantity` (its "default to 1
+when absent" behaviour isn't part of the field policy), and traits'
+`points` → `base_points` rename. A synthesized sheet now carries equipment's
+`tech_level`, `legality_class`, `uses`, `max_uses`, `base_value` and
+`base_weight`, and traits' `levels`.
 
-| section | `fields.RULES` knows | `_add_row` writes |
-|---|---|---|
-| equipment | `description`, `quantity`, `equipped`, `reference`, `tech_level`, `legality_class`, `uses`, `max_uses`, `base_value`, `base_weight`, `local_notes` | `description`, `quantity`, `equipped`, `reference`, `local_notes` |
-| traits | `name`, `levels`, `reference`, `local_notes` | `name`, `base_points`, `reference`, `local_notes` |
-| skills | `name`, `points`, `reference`, `local_notes` | `name`, `difficulty`, `points`, `reference`, `local_notes` |
-
-So a synthesized sheet silently drops every item's **weight, value, legality
-class, tech level and uses** — all of which Foundry has and the policy already
-knows how to read. This is invisible in merge mode, where those fields come
-from the base sheet, which is why it survived this long.
-
-Fixing it is mostly deletion: iterate `RULES[section]`, call `rule.read(row,
-{})`, skip zero values, and keep only the handful of things the policy does not
-cover (`id`, `base_points` vs `points`, the difficulty guess). Do it with the
-oracle in hand — GCS's rewrite is what will say whether each new field is
-right, exactly as it did for the four defects in §8.4.
+The oracle (§8.4) found a real defect the moment it had `levels` to look at:
+GCS's `trait.go` forces `can_level = true` on load whenever a non-container
+trait has nonzero `levels`, and we were not writing it. Fixed alongside —
+`_add_row` now sets it whenever it writes a nonzero `levels`.
 
 ## 8.2 Composed names are not decomposed
 
-GGA composes several GCS fields into one Foundry `name` on import.
-`docs/04-mapping.md` §4 documents the composition and says how to reverse it.
-Synthesize mode writes the composed string straight into `name`:
+**Done 2026-09-02, for traits and skills** (not techniques — see §8.3, still
+open). GGA composes several GCS fields into one Foundry `name` on import;
+`docs/04-mapping.md` §4 documents the composition and how to reverse it.
+Synthesize mode used to write the composed string straight into `name`:
 
-| written now | should be |
+| written now | before |
 |---|---|
-| `"Esoteric Medicine (Menkhu)"` | `name: "Esoteric Medicine"`, `specialization: "Menkhu"` |
-| `"Survival (Swampland)"` | `name: "Survival"`, `specialization: "Swampland"` |
-| `"Good Reputation 3"` | `name: "Good Reputation"`, `levels: 3`, `can_level: true` |
+| `name: "Esoteric Medicine"`, `specialization: "Menkhu"` | `"Esoteric Medicine (Menkhu)"` |
+| `name: "Survival"`, `specialization: "Swampland"` | `"Survival (Swampland)"` |
+| `name: "Good Reputation"`, `levels: 3`, `can_level: true` | `"Good Reputation 3"` |
 
-The rule is in `docs/04-mapping.md` §4.9 and it is one-directional for a
-reason: match the decoration patterns explicitly and treat everything else as a
-rename, never the reverse. `fields.expected_notes` and `Row.gcs_name` already
-do the equivalent reasoning for notes and matching, so the shape to copy
-exists.
+`fields.decompose_skill_name` splits the trailing ` (specialization)` group and
+then a `/TL<n>` suffix off a skill's name, in that order — the order GGA's
+`importSk` appends them in. It is only trusted when the row was not renamed in
+Foundry (`row.display_name == row.gcs_name`); a genuine rename is written
+as-is rather than guessed at, per §4.9. Traits reuse the existing rename check
+(`fields._read_name` / `expected_display_name`) directly, fed a fabricated base
+row carrying the level and the undecorated `originalName` — no new logic
+needed there, since `originalName` never carried the level suffix to begin
+with.
 
 Merge mode is unaffected — it compares names, it does not build them.
 
@@ -71,15 +68,55 @@ The TID is preserved and GCS accepts the row, so this is lossy, not broken.
 ## 8.4 What the oracle would find next
 
 Diffing our output against GCS's rewrite of it is the highest-yield technique
-in this project — it found four real defects the moment synthesize mode gave it
-new rows to look at (trait `points` vs `base_points`, profile key order, a
-written zero, and re-minted technique TIDs). It has only ever been pointed at
-one character.
+in this project — it found five real defects now (trait `points` vs
+`base_points`, profile key order, a written zero, re-minted technique TIDs,
+and the missing `can_level` from §8.1). It has only ever been pointed at one
+character — **until 2026-09-02.**
 
-Point it at more. Every `.gcs` in `gcs/model/gurps/testdata/` is a free
-fixture, and `test_gcs_rewrites_the_fixtures_unchanged_apart_from_calc` already
-parametrizes over a list — extending that list costs nothing and each new file
-is a new chance to disagree.
+**The `gcs/model/gurps/testdata/` well is dry.** It has exactly one `.gcs`
+fixture (`issue767.gcs`), and it was already in the list. There is nothing
+free left there; whoever wrote this entry expected more than there turned out
+to be.
+
+**What actually extended coverage: the user's own GCS install directory**
+(`C:\GOTProject\gcs\`) had seven more real characters sitting next to
+`sturm.gcs`, which was already a fixture. Four turned out to be clean fixed
+points of GCS's own serializer and are now in `samples/characters/` and both
+`FIXTURES` and `test_our_own_fixtures_are_exact_fixed_points` in
+`test_oracle.py`: **Alys Dustin, Sharpbend, Surubash, Suruchin.**
+
+Pointing the oracle at the other three found two more real things, neither a
+json2gcs defect:
+
+* **`_strip_calc` was missing `defaulted_from`.** A skill's cached best
+  default is written to disk from a script evaluation
+  (`gcs/model/gurps/skill.go`, `entity.go` around line 206) and recomputed on
+  every load — exactly like `calc`, just not nested under that key. Two of the
+  seven characters (Ashköl, Qanbash) differed *only* in this field, which
+  means `--verify` would have wrongly called it a writer bug on any real
+  sheet with skill defaults recorded. Fixed: `cli._strip_calc` now drops both
+  `calc` and `defaulted_from` (via a `_DERIVED_KEYS` set).
+* **Three characters (Ashköl, Qanbash, Mentash) carry an invalid entity
+  `id`.** `A...` is the only valid entity TID prefix (`tid.Kind.ENTITY`);
+  these three have a lowercase `b...` id, which is not a `Kind` GCS
+  recognizes at all. GCS silently mints a fresh one on every load, the same
+  "fix up old data" behaviour `trait.go` does for pre-TID trait ids. That
+  means these three can never be an exact fixed point regardless of what
+  json2gcs does, so they were **not** added as fixtures. Mentash also has a
+  legacy `weapons[]` entry (a `"Thrown"`-usage knife) that loses `range`,
+  `rate_of_fire`, `shots` and `bulk` on GCS's rewrite — a one-off migration
+  artifact in that specific save, not a pattern worth generalizing since
+  those fields are real, editable data everywhere else (docs/04-mapping.md
+  4.6) and weapons are never written by json2gcs regardless (§8.5).
+
+  Whether merge/synthesize mode should itself detect and remint an invalid
+  base-file `id` (`docs/04-mapping.md` 4.1 currently just says "keep the
+  base file's") is now a known open question, not yet acted on — no fixture
+  exercises a merge against one of these three files.
+
+  The three excluded originals are not committed; if that open question ever
+  gets picked up, re-derive them from `C:\GOTProject\gcs\` rather than
+  trusting this file's memory of their exact bytes.
 
 ## 8.5 Weapons are dropped entirely
 
