@@ -24,6 +24,30 @@ GCS's `trait.go` forces `can_level = true` on load whenever a non-container
 trait has nonzero `levels`, and we were not writing it. Fixed alongside —
 `_add_row` now sets it whenever it writes a nonzero `levels`.
 
+**One follow-on, found on 2026-09-02 by auditing the output against the real
+sheet** (`docs/05-fidelity.md` §5.10). A second candidate — that leveled traits
+should be written with `points_per_level` rather than a flat `base_points` —
+was investigated and **rejected**: it is not recoverable, and what we write is
+already the best available answer. §5.10 records why, so nobody re-opens it.
+
+### 8.1a `gga_default` suppression is merge-mode reasoning applied to mode B
+
+`_add_row` skips any field whose value equals `Rule.gga_default`. In merge mode
+that rule is right and necessary (§5.3): writing GGA's fabricated default back
+would add a field the base sheet never had, dirtying every round trip. In
+synthesize mode there is no base sheet to protect, so the same rule just
+discards what Foundry reported.
+
+Measured effect: 23 equipment rows lose `legality_class: "4"`, which the real
+sheet records explicitly. Harmless — LC 4 is the GURPS default and GCS reads an
+absent one the same way — but the reasoning is wrong for the mode, and the next
+field to acquire a `gga_default` may not be harmless. `legality_class` is the
+only one that currently changes the outcome; `tech_level`, `uses` and
+`max_uses` would be dropped as zero anyway.
+
+The fix is a flag on the loop rather than a change to the policy: honour
+`gga_default` when there is a base row, ignore it when synthesizing.
+
 ## 8.2 Composed names are not decomposed
 
 **Done 2026-09-02, for traits and skills** (not techniques — see §8.3, still

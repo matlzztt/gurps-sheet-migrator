@@ -130,8 +130,13 @@ the field as `tags`, so `categories` is empty on every equipment row in every
 fixture.
 
 **Points inputs**
-Trait `base_points` / `points_per_level` / `can_level` / `round_down` /
-`max_levels` — Foundry has only the evaluated total.
+GCS prices a trait with `base_points`, `points_per_level` and `can_level`, plus
+`round_down` and `max_levels`. Foundry has one number: the evaluated total,
+after levels *and* modifiers. Partially recovered as of 2026-09-02 —
+`can_level` is derived rather than guessed (`trait.go` forces it whenever
+`levels` is nonzero) and Foundry's `points` is written to `base_points`, which
+reproduces the correct total. The per-level *structure* cannot come back; §5.10
+works through why.
 
 **Identity**
 `profile.organization` (no Foundry field exists at all) · `profile.portrait`
@@ -355,3 +360,93 @@ copying values across from the export would have been.
 
 The flag needs GCS installed. Point at it with `--gcs PATH` or `JSON2GCS_GCS`;
 installs are frequently not on `PATH`.
+
+## 5.10 The loss audit, measured
+
+Run on `samples/container/` on 2026-09-02, after the §8.1/§8.2 work. Everything
+below is counted from the files, not reasoned about. The two halves answer
+different questions: merge mode is asked *what did we destroy*, synthesize mode
+is asked *what did we fail to recover*.
+
+### Merge mode destroys nothing
+
+Every `(row, key)` pair in `container.gcs` compared before and after merging
+`container-played.foundry.json`:
+
+| | |
+|---|---|
+| rows in → out | 78 → 78, **none vanished** |
+| keys removed from a surviving row | 5 × `equipped` — the un-equip cascade, and removal *is* the correct write (§5.7, `omitzero`) |
+| values changed | 1 `description` (the rename), 1 `quantity` (arrows 10 → 4) |
+| changes withheld, each with a reason | 4 |
+| rows in the sheet but not the export | 1 (`Poisons`) — **kept** |
+
+The four withheld are the two `Cloth, Padded` modifier-contaminated quantities
+(§5.4), the one unitless-on-a-metric-sheet weight (`docs/04-mapping.md` §4.11),
+and one note behind `--include-lossy`. Nothing outside those was touched:
+`modifiers`, `features`, `prereqs`, `source`, `settings` and the body plan
+survive because `apply.py` edits the base structure in place.
+
+**The single destructive path is `--deletions drop`**, which would have removed
+`Poisons` — a row that is genuinely ambiguous between "deleted in Foundry" and
+"added to GCS after the export". The `keep` default is what makes merge mode
+non-destructive, and it is why that default should stay.
+
+### Synthesize mode, against the real sheet it came from
+
+78 of 78 rows matched by TID. Fields the real `container.gcs` has that a
+synthesized sheet does not, grouped by *why*:
+
+| Cause | Fields, with row counts |
+|---|---|
+| Unrecoverable from any export | `source` (37), `tags` (41), `skills.defaults` (19), `modifiers` (5), `weapons` (5), `features` (4), `traits.points_per_level` (3, see below), `skills.default` (2), `skills.limit` (2), `encumbrance_penalty_multiplier` (2), `points_record`, `profile.organization`, `portrait` |
+| Correctly not written | `defaulted_from` (18) and `calc` — GCS recomputes both on load |
+| Recoverable, not yet done | `equipment.legality_class` (23) — `docs/08-improvements.md` §8.1a |
+
+And where a written value differs from the real sheet:
+
+| Field | Rows | Why |
+|---|---|---|
+| `difficulty` | 18 | the Easy/Average/Hard letter is not in the export at all; `iq/e` is the honest floor (§4.5) |
+| `local_notes` | 22 | GGA's modifier-name concatenation, written through (§5.7) |
+| `name` | 4 | nameable templates resolved away, plus GGA's mangled technique names (§5.2) |
+| `base_weight` | 22 | **not a loss** — units. The synthesized sheet declares `lb` (GCS's default template) and the real one is `kg`; Foundry stores lb-converted display values, so the numbers are self-consistent in their own sheet. What is lost is the character's native unit setting, along with the rest of `settings` |
+
+**The character comes out mechanically identical.** After GCS recomputes,
+every derived stat agrees with the real sheet: `basic_lift` 20 lb, `dodge`
+[9,8,7,6,5], `move` [6,4,3,2,1], `thrust` 1d-2, `swing` 1d, `total_points` 209.
+
+### Why a leveled trait cannot keep its per-level pricing
+
+Worth writing down, because it looks like a bug and is not. `Good Reputation`
+on the real sheet:
+
+| | |
+|---|---|
+| `points_per_level` | 5 |
+| `levels` | 3 |
+| enabled modifier | `People Affected`, `cost_adj: "x1/3"` |
+| `calc.points` | **5** — that is 5 × 3 × ⅓ |
+
+Foundry exports `points: '5'`. That is the evaluated total, exactly as
+`docs/04-mapping.md` §4.4 says — not the per-level figure it coincidentally
+resembles here. We write it to `base_points` on a row with no modifiers and no
+per-level cost, and GCS re-evaluates to the same 5. Both sheets charge 5, 5 and
+−5 for the three leveled traits.
+
+Recovering `points_per_level` would mean inverting `total = ppl × levels ×
+modifier multiplier` — and the modifiers are precisely what no export carries
+(§5.5). Dividing `points` by `levels` would give 1⅔, which is not the answer
+and interacts badly with `round_down`. **So the flat total is the best available
+answer, and it is right.** What is genuinely lost is the pricing *structure*:
+raise the trait a level inside GCS afterwards and it will not reprice itself.
+Keeping `levels` anyway is the better trade — the character really does have
+Reputation 3, and that is real information the export does carry.
+
+### What the export holds that nothing reads
+
+`costsum` / `weightsum` (extended totals, 🗑️ — the per-row `cost`/`weight` are
+the inputs), `skills.import` (that is `calc.level`), `originalCount`, and the
+flat `melee` (8) / `ranged` (3) lists, which are never written by design
+(§4.6, `docs/08-improvements.md` §8.5). Nothing in that list is an accidental
+omission.
