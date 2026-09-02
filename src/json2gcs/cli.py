@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 
 from . import apply as applymod
-from . import foundry, gcs, jsonio, reconcile, report, synthesize, tid
+from . import foundry, gcs, jsonio, reconcile, report, store, synthesize, tid
 from . import __version__
 
 
@@ -63,6 +63,47 @@ def _resolve_base(args: argparse.Namespace, actor: foundry.Actor, export: Path) 
         else ""
     )
     raise ValueError(f"no base .gcs sheet given and none found{hint}; pass --base")
+
+
+def _remember(path: Path, where: str | None) -> None:
+    """Snapshot a base sheet, reporting what happened but never failing on it.
+
+    A store that cannot be written is a lost future convenience; the merge the
+    user actually asked for still has to happen (docs/06-architecture.md 6.9).
+    """
+    try:
+        snapshot, is_new = store.Store(store.find_root(where)).remember(path)
+    except (OSError, ValueError) as err:
+        print(f"  · not remembered: {err}")
+        return
+    if is_new:
+        print(f"  · remembered this sheet as {snapshot.digest} for future merges")
+
+
+def cmd_remember(args: argparse.Namespace) -> int:
+    shelf = store.Store(store.find_root(args.store))
+
+    if args.list:
+        found = shelf.snapshots()
+        print(f"Store: {shelf.root}")
+        if not found:
+            print("  (empty — run 'json2gcs remember <sheet.gcs>')")
+            return 0
+        for snapshot in found:
+            print(f"  {snapshot.describe()}")
+            print(f"      from {snapshot.source}")
+        return 0
+
+    if not args.sheets:
+        raise ValueError("give at least one .gcs sheet to remember, or pass --list")
+
+    for name in args.sheets:
+        path = Path(name)
+        snapshot, is_new = shelf.remember(path)
+        verb = "remembered" if is_new else "already stored"
+        print(f"{verb}: {snapshot.describe()}")
+    print(f"\nStore: {shelf.root}")
+    return 0
 
 
 def cmd_diff(args: argparse.Namespace) -> int:
@@ -263,6 +304,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
 
     base = _resolve_base(args, actor, export)
     sheet = gcs.load(base)
+    if not args.no_remember:
+        _remember(base, args.store)
 
     if args.output:
         out = Path(args.output)
@@ -486,6 +529,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to the GCS executable (or set JSON2GCS_GCS)",
     )
     convert.add_argument(
+        "--store", help="where to keep snapshots of the base sheet (or set JSON2GCS_STORE)"
+    )
+    convert.add_argument(
+        "--no-remember",
+        action="store_true",
+        help="do not snapshot the base sheet before merging into it",
+    )
+    convert.add_argument(
         "--rename",
         action="store_true",
         help=(
@@ -494,6 +545,20 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     convert.set_defaults(func=cmd_convert)
+
+    remember = sub.add_parser(
+        "remember",
+        help="keep a copy of a .gcs sheet, so a later export can be merged "
+        "against the sheet as it was when Foundry imported it",
+    )
+    remember.add_argument("sheets", nargs="*", help="the .gcs sheet(s) to store")
+    remember.add_argument(
+        "--list", action="store_true", help="show what is already stored"
+    )
+    remember.add_argument(
+        "--store", help="where to keep snapshots (or set JSON2GCS_STORE)"
+    )
+    remember.set_defaults(func=cmd_remember)
 
     window = sub.add_parser("gui", help="open the window (the default when run with no arguments)")
     window.set_defaults(func=cmd_gui)

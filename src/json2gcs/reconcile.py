@@ -448,14 +448,6 @@ def _diff_attributes(actor: foundry.Actor, sheet: gcs.Sheet) -> list[Change]:
     return changes
 
 
-#: How GGA writes ``system.lastImport``. ``actor-importer.js`` builds it as
-#: ``new Date().toString().split(' ').splice(1, 4).join(' ')`` — the weekday and
-#: the zone stripped off JavaScript's fixed date format. That format is
-#: locale-independent by specification, so parsing it is safe; what it loses is
-#: the offset, leaving browser-local time.
-_LAST_IMPORT = "%b %d %Y %H:%M:%S"
-
-
 def _import_is_stale(actor: foundry.Actor, sheet: gcs.Sheet) -> str:
     """Warn when the base sheet was edited after Foundry imported from it.
 
@@ -474,10 +466,10 @@ def _import_is_stale(actor: foundry.Actor, sheet: gcs.Sheet) -> str:
         return ""  # synthesize mode merges against an empty sheet; nothing to lose
     stamp = (actor.last_import or "").strip()
     modified = str(sheet.data.get("modified_date") or "").strip()
-    if not stamp or not modified:
+    imported = foundry.parse_last_import(stamp)
+    if imported is None or not modified:
         return ""
     try:
-        imported = datetime.strptime(stamp, _LAST_IMPORT)
         edited = datetime.fromisoformat(modified).replace(tzinfo=None)
     except ValueError:
         return ""  # an unexpected format is not evidence of anything

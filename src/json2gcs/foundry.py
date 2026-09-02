@@ -15,12 +15,42 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterator
 
 from . import tid as tidmod
 
-__all__ = ["Row", "Actor", "load", "loads", "SUPPORTED_SYSTEM_VERSIONS"]
+__all__ = [
+    "Row",
+    "Actor",
+    "load",
+    "loads",
+    "parse_last_import",
+    "SUPPORTED_SYSTEM_VERSIONS",
+]
+
+#: How GGA writes ``system.lastImport``.  ``actor-importer.js`` builds it as
+#: ``new Date().toString().split(' ').splice(1, 4).join(' ')`` — JavaScript's
+#: fixed date format with the weekday and the zone stripped off.  That format is
+#: locale-independent by specification, so parsing it is safe; what it loses is
+#: the offset, leaving browser-local time.
+_LAST_IMPORT = "%b %d %Y %H:%M:%S"
+
+
+def parse_last_import(text: str | None) -> datetime | None:
+    """When Foundry imported the sheet, as a naive local time, or ``None``.
+
+    Naive on purpose: the zone is not in the string, so pretending to know it
+    would be worse than admitting the comparison is only exact when GCS and the
+    browser ran on the same machine.
+    """
+    if not text:
+        return None
+    try:
+        return datetime.strptime(text.strip(), _LAST_IMPORT)
+    except ValueError:
+        return None
 
 #: GGA versions this reader has been checked against. The sample was exported by
 #: 0.18.13; the pinned clone is 0.18.22. GGA's actor schema does move between

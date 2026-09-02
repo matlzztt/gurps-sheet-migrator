@@ -1,7 +1,9 @@
 # 6. Proposed architecture
 
-This is a proposal for Phase 2, derived from the findings in docs 1–5. Nothing
-here is built yet.
+Originally a proposal derived from the findings in docs 1–5. Most of it is now
+built — §6.5's oracle, §6.7's CLI, and §6.9's phases 0 and 1 — and each section
+says where it stands rather than the file claiming a single status for all of
+them.
 
 ## 6.1 Pipeline
 
@@ -190,6 +192,11 @@ json2gcs convert actor.json --base character.gcs -o character.gcs
 json2gcs convert actor.json --synthesize -o new-character.gcs
 ```
 
+```bash
+json2gcs remember character.gcs     # before exporting to Foundry; §6.9
+json2gcs remember --list
+```
+
 Worth having early:
 
 - `--dry-run` — print the reconcile report, write nothing.
@@ -257,8 +264,8 @@ user exactly what changed in play, even before it can apply the changes.
 
 ## 6.9 The snapshot store — turning inference into deduction
 
-Proposed 2026-09-02, phase 0 built. Everything below applies to **merge mode**;
-mode B is what it makes rare.
+Proposed 2026-09-02; phases 0 and 1 built. Everything below applies to **merge
+mode**; mode B is what it makes rare.
 
 ### The problem it solves
 
@@ -308,12 +315,36 @@ is exact only when both were written on the same machine — `lastImport` has no
 zone to compare against. Guarded on `sheet.by_tid` being non-empty, so mode B,
 which merges against a freshly stamped empty sheet, never trips it.
 
-**Phase 1 — remember.** `json2gcs remember <sheet.gcs>`, plus an automatic
-remember on every `convert --base`. Store the **whole file bytes**, not an
-extraction: they are 20–100 KB, it is lossless by construction, and this project
-already treats the byte stream as the contract (§6.5). Index row TID → snapshot,
-so lookup never depends on a filename. Seeding is retroactive — any `.gcs` still
-on disk can be remembered now, and every later export from it is covered.
+**Phase 1 — remember. Built** (`json2gcs/store.py`, `json2gcs remember`, and an
+automatic snapshot on every `convert --base` unless `--no-remember`). Snapshots
+are the **whole file bytes**, not an extraction: 20–100 KB each, lossless by
+construction, and the byte stream is already the contract everywhere else
+(§6.5). Store location follows the `find_gcs` rule — argument, then
+`JSON2GCS_STORE`, then a per-platform default — so there is one convention to
+remember. Seeding is retroactive: any `.gcs` still on disk can be remembered
+now, and every later export from it is covered.
+
+Four decisions the plan did not anticipate:
+
+* **Keyed by content hash, not by the entity id.** Three of the sample
+  characters carry an entity id GCS itself rejects and remints
+  (`docs/08-improvements.md` §8.4), so the id is not something to key on. A hash
+  also makes re-remembering an unchanged file a free no-op, and makes an *edited*
+  sheet a second snapshot rather than an overwrite — which is what turns the
+  store into the history of states that phase 3 needs.
+* **Lookup is by row TID, never by filename.** `Store.matches` ranks snapshots
+  by how many of the export's TIDs they contain. On the fixture that is 77 of
+  77, and an export sharing no TIDs correctly matches nothing rather than
+  falling back to the only snapshot on hand.
+* **`ancestor_for` picks the newest snapshot written *before* `lastImport`** —
+  the state Foundry actually read — rather than the newest overall, which is
+  precisely the sheet a two-way merge would silently revert. When the stamp is
+  unparseable it degrades to the best TID match: an odd timestamp is a reason to
+  be less certain, not a reason to be useless.
+* **Neither a corrupt index nor an unwritable store may cost anything.** The
+  blobs are the data and the index is derivable from them, so a broken index
+  reads as empty rather than raising; and a failed snapshot prints a note and
+  lets the merge — the thing the user actually asked for — proceed.
 
 **Phase 2 — find the base.** `convert export.json` with no `--base` looks its
 own row TIDs up in the store. Mode B stops being the fallback for "I don't have
