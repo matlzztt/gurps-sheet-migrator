@@ -131,6 +131,25 @@ def test_no_snapshots_means_no_ancestor(shelf):
     assert shelf.ancestor_for(foundry.load(PLAYED)) is None
 
 
+def test_snapshots_sharing_a_date_break_the_tie_the_same_way_every_time(
+    shelf, tmp_path
+):
+    """``convert`` re-remembers its base, so a run routinely stores a second
+    copy dated the same as one already held. Picking between them by luck made
+    the three-way merge intermittent — which is worse than either answer."""
+    first, _ = shelf.remember(SHEET)
+    edited = gcs.load(SHEET)
+    edited.by_tid["st-aIJoQceF4-T__2"].data["points"] = jsonio.Num("12")
+    twin = tmp_path / "twin.gcs"
+    jsonio.dump(twin, edited.data)  # same modified_date, different content
+    second, _ = shelf.remember(twin)
+
+    assert first.modified_date == second.modified_date
+    actor = foundry.load(PLAYED)
+    picked = {shelf.ancestor_for(actor).digest for _ in range(20)}
+    assert picked == {first.digest}, "the earlier-remembered snapshot, always"
+
+
 # --------------------------------------------------------------------------
 # the store on disk
 # --------------------------------------------------------------------------
@@ -311,6 +330,85 @@ def test_without_a_snapshot_the_error_says_what_to_do(capsys, tmp_path):
     code = cli.main(["convert", str(export), "--store", str(tmp_path / "empty")])
     assert code == 2
     assert "json2gcs remember" in capsys.readouterr().err
+
+
+def _sheet_the_gm_edited(tmp_path: Path) -> Path:
+    """A copy of the fixture with Stealth raised, as if in GCS after exporting."""
+    sheet = gcs.load(SHEET)
+    sheet.by_tid["st-aIJoQceF4-T__2"].data["points"] = jsonio.Num("12")
+    out = tmp_path / "sheet.gcs"
+    jsonio.dump(out, sheet.data)
+    return out
+
+
+def test_convert_uses_the_remembered_sheet_as_the_ancestor(capsys, tmp_path):
+    """Phase 3, end to end: remember, edit in GCS, then merge a play export."""
+    root = tmp_path / "store"
+    store.Store(root).remember(SHEET)
+    live = _sheet_the_gm_edited(tmp_path)
+
+    code, text = run(
+        capsys, "convert", str(PLAYED), "--base", str(live),
+        "-o", str(tmp_path / "out.gcs"), "--store", str(root),
+    )
+    assert code == 0
+    assert "Three-way merge" in text
+    assert "Already newer in the sheet" in text
+    assert "keeping 12" in text
+
+    merged = gcs.load(tmp_path / "out.gcs")
+    assert str(merged.by_tid["st-aIJoQceF4-T__2"].data["points"]) == "12", (
+        "the GM's edit must survive the merge"
+    )
+
+
+def test_no_ancestor_restores_the_two_way_behaviour(capsys, tmp_path):
+    """The escape hatch has to actually reproduce the old answer, including
+    the revert — otherwise it is not a comparison anyone can trust."""
+    root = tmp_path / "store"
+    store.Store(root).remember(SHEET)
+    live = _sheet_the_gm_edited(tmp_path)
+
+    code, text = run(
+        capsys, "convert", str(PLAYED), "--base", str(live),
+        "-o", str(tmp_path / "out.gcs"), "--store", str(root), "--no-ancestor",
+    )
+    assert code == 0
+    assert "Three-way merge" not in text
+    merged = gcs.load(tmp_path / "out.gcs")
+    assert str(merged.by_tid["st-aIJoQceF4-T__2"].data["points"]) == "8", (
+        "two-way reverts the GM's edit; that is what phase 3 exists to stop"
+    )
+
+
+def test_with_nothing_remembered_the_merge_is_still_two_way(capsys, tmp_path):
+    """convert snapshots its base before merging, so without this the run
+    would find the copy it had just taken and call comparing the sheet against
+    itself a three-way merge."""
+    live = _sheet_the_gm_edited(tmp_path)
+    code, text = run(
+        capsys, "convert", str(PLAYED), "--base", str(live),
+        "-o", str(tmp_path / "out.gcs"), "--store", str(tmp_path / "empty"),
+    )
+    assert code == 0
+    assert "Three-way merge" not in text
+    assert "remembered this sheet" in text, "but it is still remembered for next time"
+
+
+def test_a_snapshot_identical_to_the_base_is_not_an_ancestor(capsys, tmp_path):
+    """An ancestor equal to the target teaches nothing — every field would
+    classify as 'only the export moved', which is two-way by another name."""
+    root = tmp_path / "store"
+    live = tmp_path / "sheet.gcs"
+    live.write_bytes(SHEET.read_bytes())
+    store.Store(root).remember(live)
+
+    code, text = run(
+        capsys, "convert", str(PLAYED), "--base", str(live),
+        "-o", str(tmp_path / "out.gcs"), "--store", str(root),
+    )
+    assert code == 0
+    assert "Three-way merge" not in text
 
 
 def test_an_unwritable_store_does_not_fail_the_merge(capsys, tmp_path, monkeypatch):

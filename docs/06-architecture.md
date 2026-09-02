@@ -1,7 +1,7 @@
 # 6. Proposed architecture
 
 Originally a proposal derived from the findings in docs 1–5. Most of it is now
-built — §6.5's oracle, §6.7's CLI, and §6.9's phases 0-2 — and each section
+built — §6.5's oracle, §6.7's CLI, and §6.9's snapshot store — and each section
 says where it stands rather than the file claiming a single status for all of
 them.
 
@@ -264,7 +264,7 @@ user exactly what changed in play, even before it can apply the changes.
 
 ## 6.9 The snapshot store — turning inference into deduction
 
-Proposed 2026-09-02; phases 0, 1 and 2 built. Everything below applies to
+Proposed and built 2026-09-02, all four phases. Everything below applies to
 **merge mode**; mode B is what it makes rare.
 
 ### The problem it solves
@@ -371,10 +371,62 @@ the live sheet, and that live file is what gets loaded and updated. Hence:
 Turning it off needs no flag: pass `--base` to choose explicitly, or
 `--synthesize` to ask for mode B on purpose.
 
-**Phase 3 — three-way reconcile.** Snapshot as ancestor, current sheet as
-theirs, export as ours. A field that changed on one side only is applied; a
-field that changed on both is a **conflict** and gets reported instead of
-silently resolved in Foundry's favour, which is what happens today.
+**Phase 3 — three-way reconcile. Built.** `reconcile(..., ancestor=sheet)`,
+wired automatically from the store by `convert` and `diff`, with `--no-ancestor`
+to force the old behaviour. Once a disagreement survives the filters that strip
+what GGA invented on the way in, `_three_way` asks which side actually moved:
+
+| the sheet still has the ancestor's value | only Foundry moved | **carry it back** |
+|---|---|---|
+| the export still has the ancestor's value | only the sheet moved | **superseded** — leave it alone |
+| neither matches | both moved | **conflict** — report, never apply |
+
+Measured on the fixture, with the GM having raised Stealth 8 → 12 and set
+arrows to 7 in GCS after exporting:
+
+```
+two-way    Stealth  points  12 → 8      ← the lost update, applied silently
+           Arrow    quantity 7 → 4      ← the GM's number overwritten
+
+three-way  Already newer in the sheet (1) — left alone
+               Stealth  points  keeping 12; the export still has 8
+           Needs review
+               Arrow    quantity 7 → 4
+                   changed on both sides since the import: the sheet now has
+                   "7" and the export "4", both from "10"
+```
+
+Four things worth knowing:
+
+* **A conflict is expressed as a `blocked` reason**, so it needs no new
+  machinery in `apply` or the report: blocked changes are already never
+  written, and `--include-lossy` cannot override them.
+* **Superseded fields never become a `Change` at all.** They are not edits to
+  carry back, they are the sheet being ahead — so they are recorded separately
+  and reported under "Already newer in the sheet" rather than as something to
+  review.
+* **Notes are judged against the ancestor's *reconstruction*.** Foundry's note
+  is a rendering that glues in modifier names (§4.4), so asking whether the raw
+  strings match would call every modifier-bearing row a conflict forever.
+  `expected_notes(ancestor)` is the right comparison and already existed.
+* **A snapshot identical to the base is not used as an ancestor.** `convert`
+  snapshots its base before merging, so without this check a first run would
+  find the copy it had just taken and announce a three-way merge against the
+  sheet itself. Every field would classify as "only the export moved" — two-way
+  by another name, and a claim to know more than we do.
+
+That last point has a sharper edge than it looks. Because `convert`
+re-remembers its base, a run routinely leaves the store holding two snapshots
+with the *same* `modified_date`, and `ancestor_for` then had nothing
+deterministic to choose between them — which made the three-way merge
+intermittent, passing or failing on the ordering of two timestamps recorded in
+the same second. Snapshots now record sub-second times, and ties break towards
+the earlier-remembered copy (a later one carrying the same content date is
+usually the current file being re-recorded). Which rule wins matters less than
+that the same one wins every time.
+
+No ancestor, or a row the ancestor never had, falls back to exactly the two-way
+answer, which is what still runs for any sheet that was never remembered.
 
 ### What it does not cover
 

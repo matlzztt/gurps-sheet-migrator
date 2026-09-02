@@ -16,8 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from json2gcs import fields, foundry, gcs, reconcile, report
+from json2gcs import apply, fields, foundry, gcs, reconcile, report
 from json2gcs.fields import Compare, Fidelity
+from json2gcs.jsonio import Num
 from json2gcs.reconcile import Status
 
 REPO = Path(__file__).resolve().parent.parent
@@ -296,6 +297,125 @@ def test_an_unreadable_timestamp_is_not_evidence(sheet):
         "after Foundry imported it" in w
         for w in reconcile.reconcile(actor, later).warnings
     )
+
+
+# --------------------------------------------------------------------------
+# three-way: telling a play edit from a GCS edit
+# --------------------------------------------------------------------------
+
+STEALTH = "st-aIJoQceF4-T__2"
+ARROW = "eQvR7mN2xLkT4bH9c"
+GOOD_REPUTATION = "t89rhDVCsi9fR6yJu"
+
+
+@pytest.fixture(scope="module")
+def ancestor() -> gcs.Sheet:
+    """The sheet as Foundry imported it — the same file the export came from."""
+    return gcs.load(DIR / "container.gcs")
+
+
+def _edited(**edits) -> gcs.Sheet:
+    """A fresh copy of the sheet with rows changed as if in GCS after the export."""
+    sheet = gcs.load(DIR / "container.gcs")
+    for row_tid, (key, value) in edits.items():
+        sheet.by_tid[row_tid].data[key] = value
+    return sheet
+
+
+def _change(result, name: str, field_name: str):
+    for delta in result.deltas:
+        if delta.name == name:
+            for change in delta.changes:
+                if change.field == field_name:
+                    return change
+    return None
+
+
+def test_only_foundry_moved_still_carries_back(ancestor):
+    """The ordinary case must be untouched: the sheet still holds what Foundry
+    imported, so the export is the newer truth."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    result = reconcile.reconcile(actor, _edited(), ancestor=ancestor)
+    quantity = _change(result, "Arrow", "quantity")
+    assert quantity is not None and quantity.applicable
+    assert str(quantity.new) == "4"
+    assert result.conflicts == []
+
+
+def test_only_the_sheet_moved_is_superseded_not_reverted(ancestor):
+    """The lost update this whole mechanism exists to prevent.
+
+    The GM raised Stealth to 12 in GCS after exporting. The export still
+    carries the 8 it was imported with — which is not an edit to carry back,
+    it is simply older.
+    """
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    sheet = _edited(**{STEALTH: ("points", Num("12"))})
+
+    two_way = reconcile.reconcile(actor, sheet)
+    reverting = _change(two_way, "Stealth", "points")
+    assert reverting is not None and reverting.applicable, (
+        "a two-way merge cannot see the problem — this is the behaviour being fixed"
+    )
+
+    three_way = reconcile.reconcile(actor, sheet, ancestor=ancestor)
+    assert _change(three_way, "Stealth", "points") is None
+    assert [(d.name, c.field) for d, c in three_way.superseded] == [
+        ("Stealth", "points")
+    ]
+
+
+def test_both_sides_moved_is_a_conflict_and_is_never_applied(ancestor):
+    """Ten arrows became four in play and seven in GCS. Nothing can reconcile
+    that but a person, so it is reported and left alone."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    sheet = _edited(**{ARROW: ("quantity", Num("7"))})
+    result = reconcile.reconcile(actor, sheet, ancestor=ancestor)
+
+    assert [(d.name, c.field) for d, c in result.conflicts] == [("Arrow", "quantity")]
+    conflict = _change(result, "Arrow", "quantity")
+    assert not conflict.applicable
+    assert '"7"' in conflict.blocked and '"4"' in conflict.blocked
+    assert '"10"' in conflict.blocked, "the reader needs the value both sides left"
+
+    outcome = apply.apply(result, sheet, include_lossy=True)
+    assert str(sheet.by_tid[ARROW].data["quantity"]) == "7", "the GM's value stands"
+    assert any(field == "quantity" for _, field, _ in outcome.skipped)
+
+
+def test_notes_are_judged_against_what_gga_would_have_rendered(ancestor):
+    """A note is a rendering, not a value (docs/04-mapping.md 4.4), so "did the
+    export move?" has to be asked of the reconstruction, not the raw string."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    sheet = _edited(**{GOOD_REPUTATION: ("local_notes", "Rewritten in GCS entirely.")})
+    result = reconcile.reconcile(actor, sheet, ancestor=ancestor)
+
+    assert _change(result, "Good Reputation", "local_notes") is None
+    assert ("Good Reputation", "local_notes") in [
+        (d.name, c.field) for d, c in result.superseded
+    ]
+
+
+def test_without_an_ancestor_nothing_changes(played):
+    """The two-way path has to stay exactly as it was, since it is what runs
+    whenever a sheet was never remembered."""
+    assert played.superseded == []
+    assert played.conflicts == []
+    assert [d.name for d in played.changed_rows]
+
+
+def test_a_row_the_ancestor_never_had_falls_back_to_two_way(ancestor):
+    """A row added to the sheet after the import has no ancestor value, so
+    there is nothing to be clever with — and being silently dropped would be
+    the worst answer."""
+    actor = foundry.load(DIR / "container-played.foundry.json")
+    sheet = _edited(**{STEALTH: ("points", Num("12"))})
+    trimmed = gcs.load(DIR / "container.gcs")
+    del trimmed.by_tid[STEALTH]
+
+    result = reconcile.reconcile(actor, sheet, ancestor=trimmed)
+    assert _change(result, "Stealth", "points") is not None
+    assert result.superseded == []
 
 
 def test_synthesize_is_never_flagged():

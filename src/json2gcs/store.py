@@ -156,7 +156,10 @@ class Store:
             return self._snapshot(digest, index["snapshots"][digest]), False
 
         sheet = gcs.load(source)
-        stamp = (now or datetime.now().astimezone()).replace(microsecond=0)
+        # Sub-second precision on purpose: two snapshots taken in the same run
+        # (one by `remember`, one by `convert`) would otherwise tie, and
+        # `ancestor_for` has to break that tie the same way every time.
+        stamp = now or datetime.now().astimezone()
         record = {
             "name": sheet.profile.get("name", "") or source.stem,
             "entity_id": str(sheet.data.get("id", "")),
@@ -225,6 +228,13 @@ class Store:
         actually read.  Falling back to the best TID match when the timestamps
         cannot decide keeps this useful on exports GGA stamped oddly; the
         caller is told which of the two it got.
+
+        Two snapshots can share a ``modified_date`` — most often because
+        ``convert`` re-remembers its base sheet, so a run stores a second copy
+        alongside one already held.  Ties break towards the one remembered
+        *first*: a later snapshot carrying the same content date is usually the
+        current file being re-recorded, not an older state.  Deterministic
+        either way, which matters more than which rule is chosen.
         """
         candidates = self.matches(actor)
         if not candidates:
@@ -240,5 +250,7 @@ class Store:
                 and snapshot.written <= imported
             ]
             if eligible:
-                return max(eligible, key=lambda s: s.written)
+                newest = max(s.written for s in eligible)
+                tied = [s for s in eligible if s.written == newest]
+                return min(tied, key=lambda s: s.remembered)
         return candidates[0][0]

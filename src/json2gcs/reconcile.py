@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Any, Iterable
 
 from . import fields as policy
-from . import foundry, gcs
+from . import foundry, gcs, schema
 from .fields import Compare, Fidelity
 from .jsonio import Num
 
@@ -72,6 +72,13 @@ class RowDelta:
     name: str
     status: Status
     changes: list[Change] = field(default_factory=list)
+    superseded: list[Change] = field(default_factory=list)
+    """Differences the export has but the sheet has already moved past.
+
+    Only ever populated with an ancestor to compare against: these are the
+    fields a two-way merge would have reverted (docs/06-architecture.md 6.9).
+    """
+
     row: foundry.Row | None = None
     entry: gcs.Entry | None = None
     moved: bool = False
@@ -132,6 +139,25 @@ class Reconciliation:
         return [d for d in self.deltas if d.status is Status.MATCHED and d.interesting]
 
     @property
+    def superseded(self) -> list[tuple[RowDelta, Change]]:
+        """Every field the sheet has moved past since the export was taken.
+
+        Empty without an ancestor — which is not the same as "there were
+        none", only that nothing could tell.
+        """
+        return [(d, c) for d in self.deltas for c in d.superseded]
+
+    @property
+    def conflicts(self) -> list[tuple[RowDelta, Change]]:
+        """Fields both sides changed. Reported, never applied."""
+        return [
+            (d, c)
+            for d in self.deltas
+            for c in d.changes
+            if c.blocked.startswith("changed on both sides")
+        ]
+
+    @property
     def blocked(self) -> list[tuple[RowDelta, Change]]:
         """Every change that was found but must not be applied automatically."""
         return [
@@ -167,7 +193,80 @@ class Reconciliation:
 # --------------------------------------------------------------------------
 
 
-def _diff_row(row: foundry.Row, entry: gcs.Entry, settings: dict) -> list[Change]:
+#: The three situations a sheet/export disagreement can turn out to be, once
+#: there is an ancestor to consult (docs/06-architecture.md 6.9, phase 3).
+_CARRY_BACK = "carry back"
+_SUPERSEDED = "superseded"
+_CONFLICT = "conflict"
+
+
+def _unchanged(a: Any, b: Any, how: Compare) -> bool:
+    """Whether two values mean the same thing, absence included.
+
+    GCS omits every zero value, so a missing key and a written zero are the
+    same statement — and the ancestor comparison sees both constantly.
+    """
+    if policy.values_equal(a, b, how):
+        return True
+    return schema.is_zero(a) and schema.is_zero(b)
+
+
+def _three_way(
+    rule: policy.Rule,
+    proposed: Any,
+    current: Any,
+    ancestor: gcs.Entry | None,
+) -> str:
+    """Classify a disagreement against the sheet as Foundry imported it.
+
+    Two-way merging cannot tell "the player edited this" from "the GM edited
+    this in GCS afterwards", and resolves both in Foundry's favour — which
+    silently reverts the second (docs/06-architecture.md 6.9).  With the
+    ancestor in hand the question is decidable:
+
+    ==========================  ==========================================
+    the sheet still has         only Foundry moved   -> carry it back
+      the ancestor's value
+    the export still has        only the sheet moved -> superseded; the
+      the ancestor's value        export is stale here, so leave it alone
+    neither matches             both moved           -> a conflict, which
+                                                        is for a human
+    ==========================  ==========================================
+
+    With no ancestor this returns ``carry back`` for everything, which is
+    exactly the old two-way behaviour.
+    """
+    if ancestor is None:
+        return _CARRY_BACK
+
+    was = ancestor.data.get(rule.gcs)
+    sheet_moved = not _unchanged(was, current, rule.compare)
+
+    if rule.gcs in ("local_notes", "markdown"):
+        # Foundry's notes are a *rendering* of the row (docs/04-mapping.md
+        # 4.4), so the question is not whether the strings match but whether
+        # GGA would have produced this one from the ancestor.
+        rebuilt = policy.expected_notes(ancestor)
+        export_moved = rebuilt is None or not policy.values_equal(
+            rebuilt, proposed, Compare.TEXT
+        )
+    else:
+        export_moved = not _unchanged(was, proposed, rule.compare)
+
+    if not export_moved:
+        return _SUPERSEDED
+    if not sheet_moved:
+        return _CARRY_BACK
+    return _CONFLICT
+
+
+def _diff_row(
+    row: foundry.Row,
+    entry: gcs.Entry,
+    settings: dict,
+    ancestor: gcs.Entry | None = None,
+    superseded: list[Change] | None = None,
+) -> list[Change]:
     rules = policy.RULES.get(entry.section, ())
     changes: list[Change] = []
     for rule in rules:
@@ -197,8 +296,33 @@ def _diff_row(row: foundry.Row, entry: gcs.Entry, settings: dict) -> list[Change
         if not present and proposed in (None, "", [], 0):
             continue
 
+        # Everything above removes differences GGA invented on the way in.
+        # What is left is a real disagreement, and only now is it worth asking
+        # which side actually moved.
+        verdict = _three_way(rule, proposed, current, ancestor)
+        if verdict is _SUPERSEDED:
+            if superseded is not None:
+                superseded.append(
+                    Change(
+                        field=rule.gcs,
+                        label=rule.label,
+                        old=current,
+                        new=proposed,
+                        fidelity=rule.fidelity,
+                        note="the sheet was edited here after the export was taken",
+                    )
+                )
+            continue
+
         blocked = ""
-        if rule.blocks_on_modifiers and entry.has_modifiers:
+        if verdict is _CONFLICT:
+            was = ancestor.data.get(rule.gcs) if ancestor is not None else None
+            blocked = (
+                f"changed on both sides since the import: the sheet now has "
+                f"{_short(current)} and the export {_short(proposed)}, "
+                f"both from {_short(was)}"
+            )
+        elif rule.blocks_on_modifiers and entry.has_modifiers:
             blocked = "row has modifiers, so Foundry's value is post-modifier"
         elif rule.compare is Compare.QUANTITY and _unit_ambiguous(current, settings):
             blocked = (
@@ -221,6 +345,16 @@ def _diff_row(row: foundry.Row, entry: gcs.Entry, settings: dict) -> list[Change
             )
         )
     return changes
+
+
+def _short(value: Any, limit: int = 40) -> str:
+    """A value as a reader can take it in at a glance."""
+    if value is None or value == "":
+        return "nothing"
+    text = " ".join(str(value).split())
+    if len(text) > limit:
+        text = text[: limit - 1] + "…"
+    return f'"{text}"'
 
 
 def _unit_ambiguous(current: Any, settings: dict) -> bool:
@@ -556,13 +690,24 @@ def _following_siblings(actor: foundry.Actor, row: foundry.Row) -> list[str]:
 
 
 def reconcile(
-    actor: foundry.Actor, sheet: gcs.Sheet, *, rename: bool = False
+    actor: foundry.Actor,
+    sheet: gcs.Sheet,
+    *,
+    rename: bool = False,
+    ancestor: gcs.Sheet | None = None,
 ) -> Reconciliation:
     """Compare an export against a base sheet. Writes nothing.
 
     The sheet's own name is left alone unless *rename* is set.  A Foundry actor
     is often named for its folder or token rather than for the character, so
     carrying its name back renames the sheet to something unwanted.
+
+    Pass *ancestor* — the sheet as it was when Foundry imported from it — to
+    make this a **three-way** comparison, which is the only way to tell an edit
+    made in play from one made in GCS afterwards (docs/06-architecture.md 6.9).
+    Without it every disagreement is resolved in the export's favour, which
+    silently reverts the second kind.  A row the ancestor does not have simply
+    falls back to the two-way answer.
     """
     result = Reconciliation()
     result.warnings.extend(actor.warnings)
@@ -609,7 +754,8 @@ def reconcile(
                 row.parent_tid, row.gcs_section, sheet, actor
             )
             delta.move_before = _following_siblings(actor, row)
-        delta.changes = _diff_row(row, entry, sheet.settings)
+        was = ancestor.by_tid.get(row.tid) if ancestor is not None else None
+        delta.changes = _diff_row(row, entry, sheet.settings, was, delta.superseded)
         deltas[row.tid] = delta
 
     for tid, entry in sheet.by_tid.items():

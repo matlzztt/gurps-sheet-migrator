@@ -131,6 +131,34 @@ def _resolve_base(args: argparse.Namespace, actor: foundry.Actor, export: Path) 
     )
 
 
+def _ancestor_sheet(
+    args: argparse.Namespace, actor: foundry.Actor, base: Base
+) -> tuple[gcs.Sheet, store.Snapshot] | None:
+    """The sheet as Foundry imported it, if we remembered it.
+
+    This is what makes the merge three-way (docs/06-architecture.md 6.9).
+    When the base *is* the remembered copy there is nothing to compare against
+    — ancestor and target would be the same file — so it is skipped.
+    """
+    if getattr(args, "no_ancestor", False) or base.is_remembered_copy:
+        return None
+    try:
+        shelf = store.Store(store.find_root(getattr(args, "store", None)))
+        snapshot = shelf.ancestor_for(actor)
+        if snapshot is None:
+            return None
+        raw = shelf.bytes_of(snapshot.digest)
+        if raw == base.path.read_bytes():
+            # The snapshot *is* the sheet we are merging into — often because
+            # this run just took it. Every field would classify as "only the
+            # export moved", which is two-way by another name, so claiming a
+            # three-way merge here would be a lie about how much we know.
+            return None
+        return gcs.loads(raw.decode("utf-8")), snapshot
+    except (OSError, ValueError):
+        return None
+
+
 def _remember(path: Path, where: str | None) -> None:
     """Snapshot a base sheet, reporting what happened but never failing on it.
 
@@ -182,8 +210,13 @@ def cmd_diff(args: argparse.Namespace) -> int:
     print(f"Base GCS sheet : {base.path}")
     if base.snapshot is not None:
         print(f"                 {base.how}")
+    found = _ancestor_sheet(args, actor, base)
+    if found is not None:
+        print(f"Compared against the sheet as Foundry imported it [{found[1].digest}]")
     print()
-    result = reconcile.reconcile(actor, sheet, rename=args.rename)
+    result = reconcile.reconcile(
+        actor, sheet, rename=args.rename, ancestor=found[0] if found else None
+    )
     print(report.render(result, verbose=args.verbose))
     return 1 if result.warnings else 0
 
@@ -393,7 +426,16 @@ def cmd_convert(args: argparse.Namespace) -> int:
             "choose a different -o, or pass --force"
         )
 
-    result = reconcile.reconcile(actor, sheet, rename=args.rename)
+    found = _ancestor_sheet(args, actor, base)
+    if found is not None:
+        print(
+            f"Three-way merge: comparing against the sheet as Foundry imported "
+            f"it [{found[1].digest}]"
+        )
+        print()
+    result = reconcile.reconcile(
+        actor, sheet, rename=args.rename, ancestor=found[0] if found else None
+    )
     print(report.render(result))
     print()
 
@@ -543,6 +585,11 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument(
         "--store", help="where snapshots are kept (or set JSON2GCS_STORE)"
     )
+    diff.add_argument(
+        "--no-ancestor",
+        action="store_true",
+        help="compare two-way, ignoring any remembered copy of the sheet",
+    )
     diff.set_defaults(func=cmd_diff)
 
     convert = sub.add_parser(
@@ -614,6 +661,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-remember",
         action="store_true",
         help="do not snapshot the base sheet before merging into it",
+    )
+    convert.add_argument(
+        "--no-ancestor",
+        action="store_true",
+        help="merge two-way: ignore any remembered copy of the sheet as Foundry "
+        "imported it, and resolve every disagreement in the export's favour",
     )
     convert.add_argument(
         "--rename",

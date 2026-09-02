@@ -175,6 +175,22 @@ def render(result: Reconciliation, *, verbose: bool = False) -> str:
                     out.append(f"            {reason}")
         out.append("")
 
+    # ---- what the three-way comparison spared ------------------------------
+    # Only ever non-empty with an ancestor to compare against: these are the
+    # fields a two-way merge would have quietly reverted.
+    superseded = result.superseded
+    if superseded:
+        out.append(
+            f"Already newer in the sheet ({len(superseded)}) — left alone"
+        )
+        for delta, change in superseded:
+            out.append(f"    {delta.name}")
+            out.append(
+                f"        {change.label:<12} keeping {_show(change.old)}; "
+                f"the export still has {_show(change.new)} from before the import"
+            )
+        out.append("")
+
     if result.warnings:
         out.append("Warnings")
         for warning in result.warnings:
