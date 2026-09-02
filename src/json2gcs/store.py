@@ -111,7 +111,8 @@ class Store:
     def _index_path(self) -> Path:
         return self.root / "index.json"
 
-    def _blob_path(self, digest: str) -> Path:
+    def blob_path(self, digest: str) -> Path:
+        """Where a snapshot's bytes live. A real file, readable by anything."""
         return self.root / "sheets" / f"{digest}.gcs"
 
     def _read_index(self) -> dict:
@@ -166,7 +167,7 @@ class Store:
             "tids": sorted(sheet.by_tid),
         }
 
-        blob = self._blob_path(digest)
+        blob = self.blob_path(digest)
         blob.parent.mkdir(parents=True, exist_ok=True)
         blob.write_bytes(raw)
 
@@ -197,7 +198,7 @@ class Store:
         return sorted(found, key=lambda s: (s.modified_date, s.remembered), reverse=True)
 
     def bytes_of(self, digest: str) -> bytes:
-        return self._blob_path(digest).read_bytes()
+        return self.blob_path(digest).read_bytes()
 
     def matches(self, actor: foundry.Actor) -> list[tuple[Snapshot, int]]:
         """Snapshots sharing row TIDs with this export, most overlap first.

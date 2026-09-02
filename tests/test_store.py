@@ -222,6 +222,97 @@ def test_convert_can_be_told_not_to_remember(capsys, tmp_path):
     assert store.Store(root).snapshots() == []
 
 
+def test_convert_finds_its_base_through_the_store(capsys, tmp_path):
+    """Phase 2: no --base, no sheet beside the export — the row TIDs are enough.
+
+    The base is the *live* sheet the snapshot was taken from, not the snapshot:
+    merging into the snapshot would silently discard everything done in GCS
+    since it was stored.
+    """
+    root = tmp_path / "store"
+    store.Store(root).remember(SHEET)
+
+    away = tmp_path / "elsewhere"
+    away.mkdir()
+    export = away / "actor.json"
+    export.write_bytes(PLAYED.read_bytes())
+
+    code, text = run(
+        capsys, "convert", str(export), "-o", str(tmp_path / "out.gcs"),
+        "--store", str(root), "--dry-run",
+    )
+    assert code == 0
+    assert "found in the snapshot store" in text
+    assert str(SHEET) in text, "it must merge into the live sheet, not the copy"
+
+
+def test_diff_finds_its_base_through_the_store(capsys, tmp_path):
+    root = tmp_path / "store"
+    store.Store(root).remember(SHEET)
+    away = tmp_path / "elsewhere"
+    away.mkdir()
+    export = away / "actor.json"
+    export.write_bytes(PLAYED.read_bytes())
+
+    code, text = run(capsys, "diff", str(export), "--store", str(root))
+    assert "found in the snapshot store" in text
+    assert "Arrow" in text, "and it actually reconciled against it"
+
+
+def test_a_moved_sheet_falls_back_to_the_remembered_copy(capsys, tmp_path):
+    """The original is gone, so the copy is the best base available — but the
+    output must land beside the export, never inside the store."""
+    root = tmp_path / "store"
+    original = tmp_path / "will-be-deleted.gcs"
+    original.write_bytes(SHEET.read_bytes())
+    store.Store(root).remember(original)
+    original.unlink()
+
+    away = tmp_path / "elsewhere"
+    away.mkdir()
+    export = away / "actor.json"
+    export.write_bytes(PLAYED.read_bytes())
+
+    code, text = run(capsys, "convert", str(export), "--store", str(root))
+    assert code == 0
+    assert "the remembered copy" in text
+    assert "no longer at" in text
+    written = away / "will-be-deleted.merged.gcs"
+    assert written.is_file(), "output belongs beside the export"
+    assert not any(
+        p.name.endswith(".merged.gcs") for p in root.rglob("*")
+    ), "nothing may be written into the store"
+
+
+def test_a_path_now_holding_someone_else_is_not_used(capsys, tmp_path):
+    """A recorded path is not a promise. If the file there is a different
+    character, the TID check must catch it rather than merging into a stranger."""
+    root = tmp_path / "store"
+    original = tmp_path / "sheet.gcs"
+    original.write_bytes(SHEET.read_bytes())
+    store.Store(root).remember(original)
+    original.write_bytes((REPO / "samples" / "characters" / "Suruchin.gcs").read_bytes())
+
+    away = tmp_path / "elsewhere"
+    away.mkdir()
+    export = away / "actor.json"
+    export.write_bytes(PLAYED.read_bytes())
+
+    code, text = run(capsys, "convert", str(export), "--store", str(root), "--dry-run")
+    assert code == 0
+    assert "the remembered copy" in text, "must fall back, not merge into Suruchin"
+
+
+def test_without_a_snapshot_the_error_says_what_to_do(capsys, tmp_path):
+    away = tmp_path / "elsewhere"
+    away.mkdir()
+    export = away / "actor.json"
+    export.write_bytes(PLAYED.read_bytes())
+    code = cli.main(["convert", str(export), "--store", str(tmp_path / "empty")])
+    assert code == 2
+    assert "json2gcs remember" in capsys.readouterr().err
+
+
 def test_an_unwritable_store_does_not_fail_the_merge(capsys, tmp_path, monkeypatch):
     """The merge is what the user asked for; the snapshot is a convenience."""
     def explode(self, path, **kwargs):

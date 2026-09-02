@@ -1,7 +1,7 @@
 # 6. Proposed architecture
 
 Originally a proposal derived from the findings in docs 1–5. Most of it is now
-built — §6.5's oracle, §6.7's CLI, and §6.9's phases 0 and 1 — and each section
+built — §6.5's oracle, §6.7's CLI, and §6.9's phases 0-2 — and each section
 says where it stands rather than the file claiming a single status for all of
 them.
 
@@ -264,8 +264,8 @@ user exactly what changed in play, even before it can apply the changes.
 
 ## 6.9 The snapshot store — turning inference into deduction
 
-Proposed 2026-09-02; phases 0 and 1 built. Everything below applies to **merge
-mode**; mode B is what it makes rare.
+Proposed 2026-09-02; phases 0, 1 and 2 built. Everything below applies to
+**merge mode**; mode B is what it makes rare.
 
 ### The problem it solves
 
@@ -346,10 +346,30 @@ Four decisions the plan did not anticipate:
   reads as empty rather than raising; and a failed snapshot prints a note and
   lets the merge — the thing the user actually asked for — proceed.
 
-**Phase 2 — find the base.** `convert export.json` with no `--base` looks its
-own row TIDs up in the store. Mode B stops being the fallback for "I don't have
-the sheet handy" and becomes what it should be: the mode for characters that
-genuinely never had one.
+**Phase 2 — find the base. Built.** `convert` and `diff` with no `--base` fall
+back to the store, after looking beside the export as before. Mode B stops being
+the fallback for "I don't have the sheet handy" and becomes what it should be:
+the mode for characters that genuinely never had one.
+
+The distinction that shapes the code: **the snapshot is the ancestor, not the
+target.** Merging into the snapshot would produce a sheet missing everything
+done in GCS since it was taken, so what the store supplies is the *location* of
+the live sheet, and that live file is what gets loaded and updated. Hence:
+
+* **A recorded path is not a promise.** `_holds_the_same_character` checks the
+  file still shares a row TID with the export before trusting it — otherwise a
+  sheet replaced by a different character would be merged into silently.
+* **A moved or deleted original falls back to the remembered copy**, which is
+  still a better answer than refusing, but says plainly that anything done in
+  GCS since is not in it.
+* **Nothing is ever written into the store.** When the base *is* the remembered
+  copy, the default output lands beside the export under the sheet's own name,
+  and the automatic snapshot is skipped — it is already there.
+* **Where the base came from is always printed**, because a base found in a
+  global store is exactly the kind of thing that should never be silent.
+
+Turning it off needs no flag: pass `--base` to choose explicitly, or
+`--synthesize` to ask for mode B on purpose.
 
 **Phase 3 — three-way reconcile.** Snapshot as ancestor, current sheet as
 theirs, export as ours. A field that changed on one side only is applied; a

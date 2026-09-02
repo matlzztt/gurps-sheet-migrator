@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 from . import apply as applymod
@@ -50,19 +51,84 @@ def _gcs_rows(sheet: dict) -> dict[str, dict]:
     return index
 
 
-def _resolve_base(args: argparse.Namespace, actor: foundry.Actor, export: Path) -> Path:
+@dataclass(frozen=True)
+class Base:
+    """The sheet to merge into, and how we came to choose it."""
+
+    path: Path
+    how: str
+    snapshot: "store.Snapshot | None" = None
+
+    @property
+    def is_remembered_copy(self) -> bool:
+        """True when ``path`` is the store's own copy of a sheet that has since
+        moved or been deleted — so nothing may be written anywhere near it."""
+        return self.snapshot is not None and Path(self.snapshot.source) != self.path
+
+
+def _holds_the_same_character(path: Path, actor: foundry.Actor) -> bool:
+    """True if the sheet at ``path`` shares any row TID with this export.
+
+    A snapshot records where its sheet was read from, but a path is not a
+    promise: the file there may since have been replaced by a different
+    character.  One shared TID settles it, since a TID is an identity.
+    """
+    try:
+        sheet = gcs.load(path)
+    except (OSError, ValueError):
+        return False
+    return any(row.tid in sheet.by_tid for row in actor.rows() if row.tid)
+
+
+def _base_from_store(actor: foundry.Actor, where: str | None) -> Base | None:
+    """Find the base through the snapshot store (docs/06-architecture.md 6.9).
+
+    The snapshot is the *ancestor*, not the target: merging into it would
+    produce a sheet missing everything done in GCS since it was taken.  So the
+    live file it was read from is what we want, and the snapshot's job here is
+    to say where that is.  Only when the original is gone do we fall back to
+    the remembered copy, which is still better than refusing outright.
+    """
+    try:
+        shelf = store.Store(store.find_root(where))
+        snapshot = shelf.ancestor_for(actor)
+    except OSError:
+        return None
+    if snapshot is None:
+        return None
+
+    live = Path(snapshot.source)
+    if live.is_file() and _holds_the_same_character(live, actor):
+        return Base(live, f"found in the snapshot store, remembered from {live}", snapshot)
+    return Base(
+        shelf.blob_path(snapshot.digest),
+        f"the remembered copy of {snapshot.name!r} [{snapshot.digest}] — the "
+        f"original is no longer at {snapshot.source}, so anything done to it in "
+        "GCS since is not here",
+        snapshot,
+    )
+
+
+def _resolve_base(args: argparse.Namespace, actor: foundry.Actor, export: Path) -> Base:
     """Find the base sheet, or explain why we cannot."""
     if args.base:
-        return Path(args.base)
+        return Base(Path(args.base), "given with --base")
     found = _find_base(actor, export)
     if found:
-        return found
+        return Base(found, f"found beside the export as {found.name}")
+    remembered = _base_from_store(actor, getattr(args, "store", None))
+    if remembered is not None:
+        return remembered
     hint = (
         f" — looked for {actor.import_name!r} beside the export"
         if actor.import_name
         else ""
     )
-    raise ValueError(f"no base .gcs sheet given and none found{hint}; pass --base")
+    raise ValueError(
+        f"no base .gcs sheet given and none found{hint}, and no snapshot of it "
+        "is stored; pass --base, or run 'json2gcs remember <sheet.gcs>' so it "
+        "can be found on its own next time"
+    )
 
 
 def _remember(path: Path, where: str | None) -> None:
@@ -110,10 +176,12 @@ def cmd_diff(args: argparse.Namespace) -> int:
     export = Path(args.export)
     actor = foundry.load(export)
     base = _resolve_base(args, actor, export)
-    sheet = gcs.load(base)
+    sheet = gcs.load(base.path)
 
     print(f"Foundry export : {export}   ({actor.name}, GGA {actor.system_version})")
-    print(f"Base GCS sheet : {base}")
+    print(f"Base GCS sheet : {base.path}")
+    if base.snapshot is not None:
+        print(f"                 {base.how}")
     print()
     result = reconcile.reconcile(actor, sheet, rename=args.rename)
     print(report.render(result, verbose=args.verbose))
@@ -303,17 +371,25 @@ def cmd_convert(args: argparse.Namespace) -> int:
         return _convert_synthesized(args, actor, export)
 
     base = _resolve_base(args, actor, export)
-    sheet = gcs.load(base)
-    if not args.no_remember:
-        _remember(base, args.store)
+    sheet = gcs.load(base.path)
+    if base.snapshot is not None:
+        print(f"Base sheet: {base.path}")
+        print(f"  · {base.how}")
+        print()
+    if not args.no_remember and not base.is_remembered_copy:
+        _remember(base.path, args.store)
 
     if args.output:
         out = Path(args.output)
+    elif base.is_remembered_copy:
+        # The base lives inside the store, and the store is ours, not the
+        # user's workspace. Land beside the export under the sheet's own name.
+        out = export.parent / f"{Path(base.snapshot.source).stem}.merged.gcs"
     else:
-        out = base.with_suffix(".merged.gcs")
-    if out.resolve() == base.resolve() and not args.force:
+        out = base.path.with_suffix(".merged.gcs")
+    if out.resolve() == base.path.resolve() and not args.force:
         raise ValueError(
-            f"refusing to overwrite the base sheet {base}; "
+            f"refusing to overwrite the base sheet {base.path}; "
             "choose a different -o, or pass --force"
         )
 
@@ -463,6 +539,9 @@ def build_parser() -> argparse.ArgumentParser:
             "also carry the Foundry actor's name back to the sheet. Off by "
             "default: the actor is often named for its token or folder"
         ),
+    )
+    diff.add_argument(
+        "--store", help="where snapshots are kept (or set JSON2GCS_STORE)"
     )
     diff.set_defaults(func=cmd_diff)
 
